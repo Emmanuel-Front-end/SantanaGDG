@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Gestor de Gastos | Logo Corporativo desde Código</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS para exportar Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f2f4f8;
+            color: #1a2634;
+            padding: 2rem 1.5rem;
+        }
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .dashboard-header {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            border: 1px solid #e9edf2;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logo-img {
+            max-height: 70px;
+            max-width: 180px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .title-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3c72, #2b4c7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .btn-primary {
+            background: #1e3c72;
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover { background: #0f2b4f; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            padding: 0.4rem 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 0.8rem;
+        }
+        .btn-outline:hover { background: #eef2f8; }
+        .btn-excel { background: #217346; color: white; border: none; }
+        .btn-excel:hover { background: #1a5c3a; }
+        .kpi-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin: 1.8rem 0 2rem;
+        }
+        .kpi-card {
+            background: white;
+            flex: 1 1 180px;
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            border: 1px solid #eef2f8;
+        }
+        .kpi-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4a627a;
+        }
+        .kpi-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #1e2f3e;
+        }
+        .filters-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .filter-group input, .filter-group select {
+            background: #f9fbfd;
+            border: 1px solid #dce3ec;
+            border-radius: 14px;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.8rem;
+            margin-left: auto;
+            align-items: center;
+        }
+        .table-wrapper {
+            background: white;
+            border-radius: 24px;
+            overflow-x: auto;
+            border: 1px solid #eef2f8;
+        }
+        .expense-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 1100px;
+        }
+        .expense-table th, .expense-table td {
+            padding: 0.85rem 0.7rem;
+            border-bottom: 1px solid #f0f2f6;
+            text-align: left;
+        }
+        .expense-table th {
+            background: #f8fafd;
+            font-weight: 600;
+        }
+        .badge-pagado { background: #dff0e4; color: #1f6e43; }
+        .badge-pendiente { background: #ffedea; color: #bc4e2c; }
+        .badge-status { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+        .action-icons i {
+            font-size: 1rem;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #5b6e8c;
+            transition: 0.1s;
+        }
+        .action-icons i:hover { color: #1e3c72; }
+        .total-row-footer {
+            background: #f7f9fc;
+            font-weight: 700;
+        }
+        .weekly-summary {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 24px;
+            padding: 1.2rem;
+        }
+        .weekly-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid #edf2f7;
+            cursor: pointer;
+            transition: 0.1s;
+            border-radius: 12px;
+        }
+        .weekly-item:hover {
+            background: #f5f9ff;
+            transform: translateX(4px);
+        }
+        .weekly-item.active-week {
+            background: #e2edfc;
+            font-weight: 600;
+            border-left: 4px solid #1e3c72;
+            padding-left: 0.8rem;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            width: 90%;
+            max-width: 550px;
+            padding: 1.8rem;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+        .form-group label { font-weight: 600; font-size: 0.75rem; margin-bottom: 0.2rem; }
+        .form-group input, .form-group select {
+            padding: 0.6rem;
+            border-radius: 16px;
+            border: 1px solid #ccc;
+        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1rem; }
+
+        /* ===== ESTILOS PARA IMPRESIÓN ===== */
+        @media print {
+            .dashboard-header .btn-primary,
+            .filters-bar,
+            .kpi-grid,
+            .weekly-summary,
+            .action-buttons,
+            .modal,
+            #clearWeekFilterBtn,
+            .btn-outline,
+            .btn-excel,
+            .action-icons {
+                display: none !important;
+            }
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .app-container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            .dashboard-header {
+                border: none;
+                box-shadow: none;
+                padding: 0.5rem 0;
+                margin-bottom: 0.5rem;
+            }
+            .header-top {
+                justify-content: flex-start;
+                gap: 1rem;
+            }
+            .logo-area {
+                margin-right: auto;
+            }
+            .logo-img {
+                max-height: 50px;
+            }
+            .title-section h1 {
+                font-size: 1.2rem;
+                color: black;
+                background: none;
+            }
+            .table-wrapper {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                border-radius: 0;
+                overflow: visible !important;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+            }
+            .expense-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9pt;
+                min-width: 0;
+                table-layout: auto;
+            }
+            .expense-table th, .expense-table td {
+                border: 1px solid #aaa;
+                padding: 0.3rem 0.4rem;
+                word-break: break-word;
+            }
+            .expense-table th {
+                background: #f1f1f1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .badge-status {
+                border: none;
+                padding: 0;
+                background: none !important;
+                color: black !important;
+                font-weight: normal;
+            }
+            .total-row-footer {
+                background: #f7f9fc;
+                font-weight: bold;
+            }
+            @page {
+                size: landscape;
+                margin: 1cm;
+            }
+            body, .app-container, .table-wrapper {
+                overflow: visible !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="dashboard-header">
+        <div class="header-top">
+            <div class="logo-area" id="logoArea">
+                <!-- El logo se insertará aquí mediante código JavaScript -->
+                <div id="logoContainer"></div>
+            </div>
+            <div class="title-section">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Gestor de Gastos</h1>
+                <p>CRUD completo | Filtros | Exportar a Excel | Impresión con logo</p>
+            </div>
+            <div>
+                <button class="btn-primary" id="btnAgregarGasto"><i class="fas fa-plus"></i> Nuevo Gasto</button>
+            </div>
+        </div>
+        <div class="kpi-grid" id="kpiContainer"></div>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group"><label><i class="fas fa-search"></i> Buscar</label><input type="text" id="searchInput" placeholder="Proveedor / concepto"></div>
+        <div class="filter-group"><label>Estado</label><select id="statusFilter"><option value="all">Todos</option><option value="PAGADO">Pagado</option><option value="PENDIENTE">Pendiente</option></select></div>
+        <div class="filter-group"><label>Tipo</label><select id="typeFilter"><option value="all">Todos</option><option value="contado">Solo Contado</option><option value="credito">Solo Crédito</option></select></div>
+        <div class="filter-group"><label>Fecha desde</label><input type="date" id="dateFrom"></div>
+        <div class="filter-group"><label>Fecha hasta</label><input type="date" id="dateTo"></div>
+        <button class="btn-outline" id="resetFilters"><i class="fas fa-undo-alt"></i> Limpiar todo</button>
+        <div class="action-buttons">
+            <button class="btn-outline btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+            <button class="btn-outline" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="expense-table" id="expensesTable">
+            <thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr</thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot id="tableFoot"><tr><td colspan="4" style="text-align:right"><strong>TOTALES</strong></td><td id="footContado">0.00</td><td id="footCredito">0.00</td><td id="footTotal">0.00</td><td colspan="3"></td></tr</tfoot>
+        </table>
+    </div>
+
+    <div class="weekly-summary" id="weeklySummaryPanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <h3 style="display: flex; align-items: center; gap: 8px;"><i class="far fa-calendar-alt"></i> Resumen por Semana (haz clic para filtrar)</h3>
+            <button class="btn-outline clear-week-btn" id="clearWeekFilterBtn" style="font-size: 0.7rem;"><i class="fas fa-times-circle"></i> Limpiar filtro semana</button>
+        </div>
+        <div id="weeklyList" class="weekly-grid"></div>
+        <div id="activeWeekInfo" style="margin-top: 0.5rem; font-size: 0.7rem; color: #5b6e8c;"></div>
+    </div>
+</div>
+
+<!-- Modal para agregar/editar -->
+<div id="gastoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">Agregar Gasto</h2>
+        <form id="gastoForm">
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="form-group"><label>Fecha</label><input type="date" id="modalFecha" required></div>
+            <div class="form-group"><label>Proveedor</label><input type="text" id="modalProveedor" required></div>
+            <div class="form-group"><label>Factura</label><input type="text" id="modalFactura"></div>
+            <div class="form-group"><label>Orden de Compra (O.C)</label><input type="text" id="modalOC"></div>
+            <div class="form-group"><label>Contado (MXN)</label><input type="number" step="0.01" id="modalContado" value="0"></div>
+            <div class="form-group"><label>Crédito (MXN)</label><input type="number" step="0.01" id="modalCredito" value="0"></div>
+            <div class="form-group"><label>Descripción</label><input type="text" id="modalDescripcion"></div>
+            <div class="form-group"><label>Estado</label><select id="modalEstado"><option value="PAGADO">PAGADO</option><option value="PENDIENTE">PENDIENTE</option><option value="CANCELADA">CANCELADA</option></select></div>
+            <div class="modal-buttons"><button type="button" class="btn-outline" id="closeModalBtn">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // CONFIGURACIÓN DEL LOGOTIPO (MODIFICAR AQUÍ)
+    // ============================================================
+    // Cambia esta ruta por la URL de tu imagen o ruta local dentro del proyecto.
+    // Ejemplo: "./img/logo-empresa.png"  o  "https://tusitio.com/logo.png"
+    const LOGO_URL = "https://placehold.co/600x200/1e3c72/white?text=MI+EMPRESA";
+    // Si no deseas imagen, déjalo vacío o null y se mostrará un ícono por defecto.
+    // ============================================================
+
+    // Datos de gastos (íntegros como en el Excel original)
+    let expensesData = [
+        { fecha:"2025-12-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"PRIMER ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"SEGUNDO ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-26", proveedor:"CFE COMISION FEDERAL DE ELECTRICIDAD", factura:"", oc:"", contado:6476, credito:0, total:6476, descripcion:"LUZ ELECTRICA DEL EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-28", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14878", oc:"VARIAS", contado:6964.76, credito:0, total:6964.76, descripcion:"PAGADAS OC QUE ERAN DE AGROMANGO", estado:"PAGADO"},
+        { fecha:"2026-01-29", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14979", oc:"1", contado:0, credito:9677.97, total:9677.97, descripcion:"DISCOS,LIJAS,PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-01-29", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14980", oc:"2", contado:0, credito:3645.04, total:3645.04, descripcion:"FLEXOMETRO,BROCAS", estado:"PENDIENTE"},
+        { fecha:"2026-01-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14981", oc:"3", contado:0, credito:1931.01, total:1931.01, descripcion:"SOLDADURA 6011, PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-02-05", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14952", oc:"4", contado:0, credito:3235.87, total:3235.87, descripcion:"PUNTAS,DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-02-06", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14982", oc:"5", contado:0, credito:7539.01, total:7539.01, descripcion:"BROCHAS,THINNER", estado:"PENDIENTE"},
+        { fecha:"2026-02-13", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14951", oc:"7", contado:0, credito:1497.95, total:1497.95, descripcion:"ESTOPA,DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-02-13", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14949", oc:"8", contado:0, credito:591.38, total:591.38, descripcion:"LIMPIADOR GRASA", estado:"PENDIENTE"},
+        { fecha:"2026-02-16", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14950", oc:"9", contado:0, credito:155, total:155, descripcion:"BOLSA PIJA", estado:"PENDIENTE"},
+        { fecha:"2026-02-19", proveedor:"PM PAQUETERIA", factura:"90873", oc:"47", contado:982.46, credito:0, total:982.46, descripcion:"ENVIO MATERIAL", estado:"PAGADO"},
+        { fecha:"2026-02-24", proveedor:"FERNANDO AGUSTIN SORIA", factura:"", oc:"11", contado:0, credito:49776.17, total:49776.17, descripcion:"4 KITS EPOXICA", estado:"PAGADO"},
+        { fecha:"2026-02-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15065", oc:"12", contado:0, credito:27482, total:27482, descripcion:"2 KITS EPOXICA", estado:"PENDIENTE"},
+        { fecha:"2026-02-26", proveedor:"INSUMOS Y RIEGOS DEL SUR", factura:"", oc:"13", contado:5758.08, credito:0, total:5758.08, descripcion:"TUBOS PVC", estado:"PAGADO"},
+        { fecha:"2026-02-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15066", oc:"14", contado:0, credito:1645, total:1645, descripcion:"ESMERIL DEWALT", estado:"PENDIENTE"},
+        { fecha:"2026-02-27", proveedor:"PMM PAQUETEROA", factura:"91683", oc:"48", contado:484.41, credito:0, total:484.41, descripcion:"PAQUETERIA", estado:"PAGADO"},
+        { fecha:"2026-03-03", proveedor:"PMM PAQUETERIA", factura:"92381", oc:"51", contado:245.84, credito:0, total:245.84, descripcion:"ENVIO", estado:"PAGADO"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15070", oc:"15", contado:0, credito:840, total:840, descripcion:"PINTURA EPOXICA", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"17", contado:0, credito:1201.04, total:1201.04, descripcion:"REMACHES", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15072", oc:"16", contado:0, credito:447, total:447, descripcion:"SILICON", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"CESAR EDUARDO ARRAYALES", factura:"CB0EA2", oc:"", contado:6090, credito:0, total:6090, descripcion:"RECTIFICADO FLECHA", estado:"PAGADO"},
+        { fecha:"2026-03-04", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15068", oc:"18", contado:0, credito:149.99, total:149.99, descripcion:"DISCOS CORTE", estado:"PENDIENTE"},
+        { fecha:"2026-03-05", proveedor:"CESAR EDUARDO ARRAYALES", factura:"CB0EA2", oc:"19", contado:3056.6, credito:0, total:3056.6, descripcion:"CARTUCHOS GRASA", estado:"PAGADO"},
+        { fecha:"2026-03-06", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15067", oc:"20", contado:0, credito:736, total:736, descripcion:"PEGAMENTOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-06", proveedor:"CESAR EDUARDO ARRAYALES", factura:"B0B3C36", oc:"3,6,22", contado:0, credito:32700.4, total:32700.4, descripcion:"MATERIAL MANTENIMIENTO", estado:"PAGADO"},
+        { fecha:"2026-03-09", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15069", oc:"23", contado:0, credito:745.01, total:745.01, descripcion:"CARDA", estado:"PENDIENTE"},
+        { fecha:"2026-03-10", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15074", oc:"24", contado:0, credito:4625.96, total:4625.96, descripcion:"COMBO ESMERIL", estado:"PENDIENTE"},
+        { fecha:"2026-03-11", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15073", oc:"25", contado:0, credito:650, total:650, descripcion:"TORNILLOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-17", proveedor:"JUMAPAE", factura:"", oc:"", contado:36792, credito:0, total:36792, descripcion:"AGUA Y DRENAJE", estado:"PENDIENTE"},
+        { fecha:"2026-03-17", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15200", oc:"26", contado:0, credito:5559.94, total:5559.94, descripcion:"CINTA MASKIN", estado:"PENDIENTE"},
+        { fecha:"2026-03-18", proveedor:"NOVATEC PAGANI", factura:"", oc:"30", contado:325728, credito:325728, total:651456, descripcion:"CAJAS PLASTICO", estado:"PENDIENTE"},
+        { fecha:"2026-03-19", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15189", oc:"27", contado:0, credito:390.86, total:390.86, descripcion:"DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-20", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15190", oc:"28", contado:0, credito:1214.01, total:1214.01, descripcion:"CARDA", estado:"PENDIENTE"},
+        { fecha:"2026-03-20", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15198", oc:"29", contado:0, credito:380, total:380, descripcion:"CUTER", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15201", oc:"32", contado:0, credito:777, total:777, descripcion:"MACHUELOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15188", oc:"33", contado:0, credito:934, total:934, descripcion:"MULTIMETRO", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"ELVA ROSA BARRON", factura:"318", oc:"34", contado:568.4, credito:0, total:568.4, descripcion:"SELLO", estado:"PAGADO"},
+        { fecha:"2026-03-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"36", contado:0, credito:941, total:941, descripcion:"CARDAS", estado:"PENDIENTE"},
+        { fecha:"2026-03-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15197", oc:"35", contado:0, credito:1645, total:1645, descripcion:"ESMERIL", estado:"PENDIENTE"},
+        { fecha:"2026-03-28", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"37", contado:0, credito:1524, total:1524, descripcion:"DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-28", proveedor:"PROVEEDORA DEL SOLDADOR", factura:"LCO33082", oc:"38", contado:5652.68, credito:0, total:5652.68, descripcion:"MAQUINA INVERSORA", estado:"PAGADO"},
+        { fecha:"2026-03-30", proveedor:"LABORATORIO LAQUIM", factura:"2954", oc:"39", contado:12488.62, credito:0, total:12488.62, descripcion:"ANALISIS MICROBIOLOGICOS", estado:"PAGADO"},
+        { fecha:"2026-03-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15192", oc:"40", contado:0, credito:4535.99, total:4535.99, descripcion:"CUBETA PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-03-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15193", oc:"41", contado:0, credito:546.03, total:546.03, descripcion:"GUANTES", estado:"PENDIENTE"},
+        { fecha:"2026-03-31", proveedor:"HUGO ALEJANDRO DURAN", factura:"31473-A", oc:"42", contado:18208, credito:0, total:18208, descripcion:"SOLERA", estado:"PAGADO"},
+        { fecha:"2026-04-01", proveedor:"CESAR EDUARDO ARRAYALES", factura:"", oc:"43", contado:0, credito:15270.37, total:15270.37, descripcion:"DULONA", estado:"PENDIENTE"},
+        { fecha:"2026-04-01", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"44", contado:0, credito:2601, total:2601, descripcion:"RESISTOL", estado:"PENDIENTE"},
+        { fecha:"2026-04-07", proveedor:"HUGO ALEJANDRO DURAN", factura:"31569-A", oc:"46", contado:2390, credito:0, total:2390, descripcion:"SOLDADURA", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"LABORATORIO LAQUIM", factura:"3006", oc:"49", contado:11572.22, credito:0, total:11572.22, descripcion:"LIQUIDACION ANALISIS", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"KIWA", factura:"", oc:"50", contado:30200.6, credito:0, total:30200.6, descripcion:"ANTICIPO CERTIFICADO", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"CFE", factura:"", oc:"", contado:2596, credito:0, total:2596, descripcion:"LUZ ELECTRICA", estado:"PAGADO"},
+        { fecha:"2026-04-08", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15194", oc:"56", contado:0, credito:4323, total:4323, descripcion:"ROTOMARTILLO", estado:"PENDIENTE"},
+        { fecha:"2026-04-08", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15196", oc:"58", contado:0, credito:5756, total:5756, descripcion:"PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-04-09", proveedor:"HUGO ALEJANDRO DURAN", factura:"31584A", oc:"59", contado:2502, credito:0, total:2502, descripcion:"SOLERAS", estado:"PAGADO"},
+        { fecha:"2026-04-13", proveedor:"JAVIER ERNESTO PADILLA", factura:"14030", oc:"20", contado:1435.22, credito:0, total:1435.22, descripcion:"BANDA", estado:"PAGADO"},
+        { fecha:"2026-04-13", proveedor:"HUGO ALEJANDRO DURAN", factura:"31607", oc:"61", contado:2637, credito:0, total:2637, descripcion:"SOLDADURA", estado:"PAGADO"},
+        { fecha:"2026-04-14", proveedor:"DERECHOS", factura:"", oc:"", contado:3510, credito:0, total:3510, descripcion:"DERECHOS HIDROTERMICO", estado:"PAGADO"},
+        { fecha:"2026-04-15", proveedor:"ALFAMAQ", factura:"", oc:"65", contado:12241.88, credito:18362.84, total:30604.72, descripcion:"IMPRESORAS (EUROS)", estado:"PENDIENTE"},
+        { fecha:"2026-04-18", proveedor:"EMEX", factura:"", oc:"", contado:30000, credito:0, total:30000, descripcion:"FONDO TERCERIA", estado:"PENDIENTE"},
+        { fecha:"2026-04-19", proveedor:"USDA", factura:"", oc:"", contado:8464.67, credito:0, total:8464.67, descripcion:"FONDO USDA", estado:"PENDIENTE"}
+    ];
+
+    // Recalcular totales
+    expensesData.forEach(item => { item.total = (item.contado || 0) + (item.credito || 0); });
+
+    // Cargar logo desde la constante definida
+    function loadLogo() {
+        const container = document.getElementById('logoContainer');
+        if (LOGO_URL && LOGO_URL.trim() !== "") {
+            container.innerHTML = `<img src="${LOGO_URL}" class="logo-img" alt="Logo empresa" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'display:flex; align-items:center; gap:8px\\'><i class=\\'fas fa-building\\' style=\\'font-size:2rem; color:#1e3c72\\'></i><span style=\\'font-weight:600\\'>Mi Empresa</span></div>';">`;
+        } else {
+            container.innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><i class="fas fa-building" style="font-size:2rem; color:#1e3c72"></i><span style="font-weight:600">Mi Empresa</span></div>`;
+        }
+    }
+    loadLogo();
+
+    // --- Funciones de semana y filtros (igual que antes) ---
+    function getWeekTagFromDate(dateStr) {
+        const date = new Date(dateStr);
+        const weekRanges = [
+            { name: "SEMANA DEL 8 AL 14 DE DICIEMBRE DEL 2025", start: "2025-12-08", end: "2025-12-14" },
+            { name: "SEMANA DEL  5 AL 10 DE ENERO 2026", start: "2026-01-05", end: "2026-01-10" },
+            { name: "SEMANA DEL 26 AL 31 DE ENERO", start: "2026-01-26", end: "2026-01-31" },
+            { name: "SEMANA DEL 9 AL 14 DE FEBRERO DEL 2026", start: "2026-02-09", end: "2026-02-14" },
+            { name: "SEMANA DEL 16 AL 21 DE FEBERERO", start: "2026-02-16", end: "2026-02-21" },
+            { name: "SEMANA DEL  23 AL 28 DE FEBRERO", start: "2026-02-23", end: "2026-02-28" },
+            { name: "SEMANA DEL 1 AL 8 DE MARZO", start: "2026-03-01", end: "2026-03-08" },
+            { name: "SEMANA DEL 9 AL 15 DE MARZO", start: "2026-03-09", end: "2026-03-15" },
+            { name: "SEMANA DEL 16 AL 22 DE MARZO", start: "2026-03-16", end: "2026-03-22" },
+            { name: "SEMANA DEL 23 AL 29 DE MARZO", start: "2026-03-23", end: "2026-03-29" },
+            { name: "SEMANA DEL 30 DE MARZO AL 5 DE ABRIL", start: "2026-03-30", end: "2026-04-05" },
+            { name: "SEMANA DEL 6 AL 12 DE ABRIL", start: "2026-04-06", end: "2026-04-12" },
+            { name: "SEMANA DEL 13 AL 19 DE ABRIL", start: "2026-04-13", end: "2026-04-19" }
+        ];
+        for (let week of weekRanges) {
+            if (date >= new Date(week.start) && date <= new Date(week.end)) return week.name;
+        }
+        return `Semana del ${dateStr} (personalizada)`;
+    }
+
+    let currentWeekFilter = null;
+
+    function getFilteredData() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const status = document.getElementById('statusFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        let filtered = expensesData.filter(exp => {
+            const matchSearch = exp.proveedor.toLowerCase().includes(search) || exp.descripcion.toLowerCase().includes(search) || (exp.factura && exp.factura.toLowerCase().includes(search));
+            const matchStatus = status === 'all' || exp.estado === status;
+            let matchType = true;
+            if (type === 'contado') matchType = exp.contado > 0 && exp.credito === 0;
+            if (type === 'credito') matchType = exp.credito > 0 && exp.contado === 0;
+            let matchDate = true;
+            if (dateFrom) matchDate = matchDate && exp.fecha >= dateFrom;
+            if (dateTo) matchDate = matchDate && exp.fecha <= dateTo;
+            return matchSearch && matchStatus && matchType && matchDate;
+        });
+        if (currentWeekFilter) {
+            filtered = filtered.filter(exp => getWeekTagFromDate(exp.fecha) === currentWeekFilter);
+        }
+        return filtered;
+    }
+
+    function renderTable() {
+        const filteredData = getFilteredData();
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        let sumContado = 0, sumCredito = 0, sumTotal = 0;
+        filteredData.forEach((item) => {
+            const tr = document.createElement('tr');
+            const badgeClass = item.estado === 'PAGADO' ? 'badge-pagado' : 'badge-pendiente';
+            tr.innerHTML = `
+                <td>${item.fecha}</td>
+                <td>${item.proveedor}</td>
+                <td>${item.factura || '-'}</td>
+                <td>${item.oc || '-'}</td>
+                <td style="text-align:right">${item.contado.toFixed(2)}</td>
+                <td style="text-align:right">${item.credito.toFixed(2)}</td>
+                <td style="text-align:right;font-weight:600">${item.total.toFixed(2)}</td>
+                <td style="max-width:200px">${item.descripcion.substring(0,55)}</td>
+                <td><span class="badge-status ${badgeClass}">${item.estado}</span></td>
+                <td class="action-icons">
+                    <i class="fas fa-edit" onclick="editExpense(${expensesData.indexOf(item)})"></i>
+                    <i class="fas fa-trash-alt" onclick="deleteExpense(${expensesData.indexOf(item)})"></i>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            sumContado += item.contado;
+            sumCredito += item.credito;
+            sumTotal += item.total;
+        });
+        document.getElementById('footContado').innerHTML = sumContado.toFixed(2);
+        document.getElementById('footCredito').innerHTML = sumCredito.toFixed(2);
+        document.getElementById('footTotal').innerHTML = sumTotal.toFixed(2);
+        updateKPIAndWeekly();
+    }
+
+    function updateKPIAndWeekly() {
+        const totalAll = expensesData.reduce((a,b)=>a+b.total,0);
+        const contadoAll = expensesData.reduce((a,b)=>a+b.contado,0);
+        const creditoAll = expensesData.reduce((a,b)=>a+b.credito,0);
+        const pagadoAll = expensesData.filter(e=>e.estado==='PAGADO').reduce((a,b)=>a+b.total,0);
+        const pendienteAll = expensesData.filter(e=>e.estado==='PENDIENTE').reduce((a,b)=>a+b.total,0);
+        document.getElementById('kpiContainer').innerHTML = `
+            <div class="kpi-card"><div class="kpi-label">Total Gastos</div><div class="kpi-value">$${totalAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Contado</div><div class="kpi-value">$${contadoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Crédito</div><div class="kpi-value">$${creditoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pagado</div><div class="kpi-value">$${pagadoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pendiente</div><div class="kpi-value">$${pendienteAll.toFixed(2)}</div></div>
+        `;
+        const weeksMap = new Map();
+        expensesData.forEach(item => {
+            const week = getWeekTagFromDate(item.fecha);
+            weeksMap.set(week, (weeksMap.get(week) || 0) + item.total);
+        });
+        const container = document.getElementById('weeklyList');
+        container.innerHTML = '';
+        for(let [week, total] of weeksMap.entries()) {
+            const div = document.createElement('div');
+            div.className = `weekly-item ${currentWeekFilter === week ? 'active-week' : ''}`;
+            div.innerHTML = `<span><i class="far fa-calendar-check"></i> ${week}</span><span><strong>$${total.toFixed(2)}</strong></span>`;
+            div.addEventListener('click', () => {
+                currentWeekFilter = (currentWeekFilter === week) ? null : week;
+                renderTable();
+            });
+            container.appendChild(div);
+        }
+    }
+
+    // CRUD
+    window.editExpense = (index) => {
+        const item = expensesData[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('modalTitle').innerText = 'Editar Gasto';
+        document.getElementById('modalFecha').value = item.fecha;
+        document.getElementById('modalProveedor').value = item.proveedor;
+        document.getElementById('modalFactura').value = item.factura;
+        document.getElementById('modalOC').value = item.oc;
+        document.getElementById('modalContado').value = item.contado;
+        document.getElementById('modalCredito').value = item.credito;
+        document.getElementById('modalDescripcion').value = item.descripcion;
+        document.getElementById('modalEstado').value = item.estado;
+        document.getElementById('gastoModal').style.display = 'flex';
+    };
+    window.deleteExpense = (index) => {
+        if(confirm('¿Eliminar este gasto permanentemente?')) {
+            expensesData.splice(index,1);
+            renderTable();
+        }
+    };
+    function addOrUpdateExpense(event) {
+        event.preventDefault();
+        const fecha = document.getElementById('modalFecha').value;
+        const proveedor = document.getElementById('modalProveedor').value;
+        const factura = document.getElementById('modalFactura').value;
+        const oc = document.getElementById('modalOC').value;
+        let contado = parseFloat(document.getElementById('modalContado').value) || 0;
+        let credito = parseFloat(document.getElementById('modalCredito').value) || 0;
+        const descripcion = document.getElementById('modalDescripcion').value;
+        const estado = document.getElementById('modalEstado').value;
+        const total = contado + credito;
+        const editIdx = parseInt(document.getElementById('editIndex').value);
+        const newExpense = { fecha, proveedor, factura, oc, contado, credito, total, descripcion, estado };
+        if(editIdx === -1) {
+            expensesData.push(newExpense);
+        } else {
+            expensesData[editIdx] = newExpense;
+        }
+        document.getElementById('gastoModal').style.display = 'none';
+        document.getElementById('gastoForm').reset();
+        document.getElementById('editIndex').value = '-1';
+        renderTable();
+    }
+
+    function exportToExcel() {
+        const filtered = getFilteredData();
+        if(filtered.length === 0) {
+            alert("No hay datos para exportar con los filtros actuales.");
+            return;
+        }
+        const exportData = filtered.map(item => ({
+            "FECHA": item.fecha,
+            "PROVEEDOR": item.proveedor,
+            "FACTURA": item.factura || "",
+            "O.C": item.oc || "",
+            "CONTADO": item.contado,
+            "CREDITO": item.credito,
+            "TOTAL": item.total,
+            "DESCRIPCION": item.descripcion,
+            "ESTADO": item.estado
+        }));
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Gastos");
+        XLSX.writeFile(wb, `reporte_gastos_${new Date().toISOString().slice(0,19)}.xlsx`);
+    }
+
+    function printReport() {
+        window.print();
+    }
+
+    // Event listeners
+    document.getElementById('btnAgregarGasto').onclick = () => {
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('modalTitle').innerText = 'Agregar Gasto';
+        document.getElementById('gastoForm').reset();
+        document.getElementById('modalContado').value = '0';
+        document.getElementById('modalCredito').value = '0';
+        document.getElementById('gastoModal').style.display = 'flex';
+    };
+    document.getElementById('closeModalBtn').onclick = () => document.getElementById('gastoModal').style.display = 'none';
+    window.onclick = (e) => { if(e.target === document.getElementById('gastoModal')) document.getElementById('gastoModal').style.display = 'none'; };
+    document.getElementById('gastoForm').addEventListener('submit', addOrUpdateExpense);
+    document.getElementById('searchInput').addEventListener('input', () => renderTable());
+    document.getElementById('statusFilter').addEventListener('change', () => renderTable());
+    document.getElementById('typeFilter').addEventListener('change', () => renderTable());
+    document.getElementById('dateFrom').addEventListener('change', () => renderTable());
+    document.getElementById('dateTo').addEventListener('change', () => renderTable());
+    document.getElementById('resetFilters').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = 'all';
+        document.getElementById('typeFilter').value = 'all';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        currentWeekFilter = null;
+        renderTable();
+    });
+    document.getElementById('clearWeekFilterBtn').addEventListener('click', () => {
+        currentWeekFilter = null;
+        renderTable();
+    });
+    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+    document.getElementById('printBtn').addEventListener('click', printReport);
+
+    renderTable();
+</script>
+</body>
+</html>
