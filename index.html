@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Gestor de Gastos | Logo interactivo y resumen semanal</title>
+    <title>Gestor de Gastos | Importar Excel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -28,7 +28,6 @@
             border-radius: 28px;
             padding: 1.5rem 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
             border: 1px solid #e9edf2;
         }
         .header-top {
@@ -38,7 +37,7 @@
             flex-wrap: wrap;
             gap: 1.5rem;
         }
-        /* Logo interactivo (como Santana Mango) */
+        /* Logo interactivo */
         .logo-wrapper {
             position: relative;
             display: inline-block;
@@ -50,7 +49,6 @@
             background: white;
             padding: 5px;
             object-fit: contain;
-            cursor: pointer;
         }
         .logo-placeholder {
             height: 60px;
@@ -136,7 +134,11 @@
             border: none;
         }
         .btn-danger:hover { background: #b91c1c; }
-        .btn-excel { background: #217346; color: white; border: none; }
+        .btn-excel {
+            background: #217346;
+            color: white;
+            border: none;
+        }
         .btn-excel:hover { background: #1a5c3a; }
         .kpi-grid {
             display: flex;
@@ -150,14 +152,12 @@
             border-radius: 24px;
             padding: 1rem 1.2rem;
             border: 1px solid #eef2f8;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
         .kpi-label {
             font-size: 0.7rem;
             font-weight: 600;
             color: #4a627a;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .kpi-value {
             font-size: 1.7rem;
@@ -201,6 +201,9 @@
         }
         .delete-all-btn {
             margin-bottom: 1rem;
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
         }
         .table-wrapper {
             background: white;
@@ -249,9 +252,6 @@
         .weekly-summary h3 {
             font-size: 1.1rem;
             margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-weight: 600;
         }
         .weekly-item {
@@ -307,7 +307,6 @@
             width: 90%;
             max-width: 550px;
             padding: 1.8rem;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
         }
         .form-group {
             display: flex;
@@ -331,81 +330,15 @@
             margin-top: 1rem;
         }
         @media print {
-            .dashboard-header .btn-primary,
-            .filters-bar,
-            .kpi-grid,
-            .weekly-summary,
-            .action-buttons,
-            .delete-all-btn,
-            .modal,
-            #clearWeekFilterBtn,
-            .btn-outline,
-            .btn-excel,
-            .btn-danger,
-            .action-icons,
-            .delete-logo-btn {
+            .btn-primary, .filters-bar, .kpi-grid, .weekly-summary, .action-buttons, .delete-all-btn, .modal, #clearWeekFilterBtn, .btn-outline, .btn-excel, .btn-danger, .action-icons, .delete-logo-btn {
                 display: none !important;
             }
-            body {
-                background: white;
-                padding: 0;
-                margin: 0;
-            }
-            .app-container {
-                max-width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-            .dashboard-header {
-                border: none;
-                box-shadow: none;
-                padding: 0.5rem 0;
-                margin-bottom: 0.5rem;
-            }
-            .header-top {
-                justify-content: flex-start;
-                gap: 1rem;
-            }
-            .logo-img {
-                max-height: 40px;
-            }
-            .title-section h1 {
-                font-size: 1.2rem;
-                color: black;
-                background: none;
-            }
-            .table-wrapper {
-                box-shadow: none;
-                border: 1px solid #ccc;
-                border-radius: 0;
-                overflow: visible !important;
-                width: 100%;
-            }
-            .expense-table th, .expense-table td {
-                border: 1px solid #aaa;
-                padding: 0.3rem 0.4rem;
-                word-break: break-word;
-            }
-            .expense-table th {
-                background: #f1f1f1 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .badge-status {
-                border: none;
-                padding: 0;
-                background: none !important;
-                color: black !important;
-                font-weight: normal;
-            }
-            .total-row-footer {
-                background: #f7f9fc;
-                font-weight: bold;
-            }
-            @page {
-                size: landscape;
-                margin: 1cm;
-            }
+            body { background: white; padding: 1cm; }
+            .dashboard-header { border: none; box-shadow: none; padding: 0; }
+            .title-section h1 { font-size: 1.2rem; color: black; background: none; }
+            .table-wrapper { border: 1px solid #ccc; }
+            .expense-table th, .expense-table td { border: 1px solid #aaa; }
+            .badge-status { background: none !important; color: black !important; }
         }
     </style>
 </head>
@@ -416,7 +349,7 @@
             <div class="logo-area" id="logoArea"></div>
             <div class="title-section">
                 <h1><i class="fas fa-file-invoice-dollar"></i> Gestor de Gastos</h1>
-                <p>Persistencia total | Haz clic en una semana para filtrar | Papelera para eliminar semana</p>
+                <p>Persistencia total | Haz clic en una semana para filtrar | Importa Excel fácilmente</p>
             </div>
             <div>
                 <button class="btn-primary" id="btnAgregarGasto"><i class="fas fa-plus"></i> Nuevo Gasto</button>
@@ -432,6 +365,7 @@
         <div class="filter-group"><label>Tipo</label><select id="typeFilter"><option value="all">Todos</option><option value="contado">Solo Contado</option><option value="credito">Solo Crédito</option></select></div>
         <button class="btn-outline" id="resetFilters"><i class="fas fa-undo-alt"></i> Limpiar todo</button>
         <div class="action-buttons">
+            <button class="btn-outline btn-excel" id="importExcelBtn"><i class="fas fa-file-upload"></i> Importar Excel</button>
             <button class="btn-outline btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
             <button class="btn-outline" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
         </div>
@@ -446,13 +380,7 @@
             <thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr</thead>
             <tbody id="tableBody"></tbody>
             <tfoot id="tableFoot">
-                <tr>
-                    <td colspan="4" style="text-align:right"><strong>TOTALES</strong></td>
-                    <td id="footContado">0.00</td>
-                    <td id="footCredito">0.00</td>
-                    <td id="footTotal">0.00</td>
-                    <td colspan="3"></td>
-                </tr>
+                <tr><td colspan="4" style="text-align:right"><strong>TOTALES</strong></td><td id="footContado">0.00</td><td id="footCredito">0.00</td><td id="footTotal">0.00</td><td colspan="3"></tr>
             </tfoot>
         </table>
     </div>
@@ -486,6 +414,9 @@
     </div>
 </div>
 
+<!-- Input oculto para seleccionar archivo Excel -->
+<input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+
 <script>
     // ================= LOGO INTERACTIVO =================
     const logoArea = document.getElementById('logoArea');
@@ -495,7 +426,7 @@
         if (currentLogoData) {
             logoArea.innerHTML = `
                 <div class="logo-wrapper">
-                    <img src="${currentLogoData}" class="logo-img" alt="Logo" style="cursor: default;">
+                    <img src="${currentLogoData}" class="logo-img" alt="Logo">
                     <button class="delete-logo-btn" id="deleteLogoBtn" title="Eliminar logo">✕</button>
                 </div>
             `;
@@ -511,11 +442,7 @@
                 });
             }
         } else {
-            logoArea.innerHTML = `
-                <div class="logo-placeholder" id="uploadLogoPlaceholder">
-                    📷
-                </div>
-            `;
+            logoArea.innerHTML = `<div class="logo-placeholder" id="uploadLogoPlaceholder">📷</div>`;
             const placeholder = document.getElementById('uploadLogoPlaceholder');
             if (placeholder) {
                 placeholder.addEventListener('click', () => {
@@ -540,12 +467,10 @@
         }
     }
     renderLogo();
-    // ====================================================
+    // ========================================================================
 
     // ================= DATOS DE GASTOS (persistencia) =================
     const STORAGE_KEY = "expensesDataCompleto";
-
-    // Lista completa de gastos (según el Excel original)
     const defaultExpenses = [
         { fecha:"2025-12-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"PRIMER ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
         { fecha:"2026-01-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"SEGUNDO ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
@@ -672,9 +597,6 @@
     function renderTable() {
         const filtered = getFilteredData();
         const tbody = document.getElementById('tableBody');
-        const footContado = document.getElementById('footContado');
-        const footCredito = document.getElementById('footCredito');
-        const footTotal = document.getElementById('footTotal');
         if (!tbody) return;
         tbody.innerHTML = '';
         let sumC = 0, sumK = 0, sumT = 0;
@@ -698,9 +620,9 @@
             sumK += item.credito;
             sumT += item.total;
         });
-        if (footContado) footContado.innerHTML = sumC.toFixed(2);
-        if (footCredito) footCredito.innerHTML = sumK.toFixed(2);
-        if (footTotal) footTotal.innerHTML = sumT.toFixed(2);
+        document.getElementById('footContado').innerHTML = sumC.toFixed(2);
+        document.getElementById('footCredito').innerHTML = sumK.toFixed(2);
+        document.getElementById('footTotal').innerHTML = sumT.toFixed(2);
         updateKPIAndWeekly();
     }
 
@@ -710,16 +632,13 @@
         const creditoAll = expensesData.reduce((a,b)=>a+b.credito,0);
         const pagadoAll = expensesData.filter(e=>e.estado==='PAGADO').reduce((a,b)=>a+b.total,0);
         const pendienteAll = expensesData.filter(e=>e.estado==='PENDIENTE').reduce((a,b)=>a+b.total,0);
-        const kpiContainer = document.getElementById('kpiContainer');
-        if (kpiContainer) {
-            kpiContainer.innerHTML = `
-                <div class="kpi-card"><div class="kpi-label">Total Gastos</div><div class="kpi-value">$${totalAll.toFixed(2)}</div></div>
-                <div class="kpi-card"><div class="kpi-label">Contado</div><div class="kpi-value">$${contadoAll.toFixed(2)}</div></div>
-                <div class="kpi-card"><div class="kpi-label">Crédito</div><div class="kpi-value">$${creditoAll.toFixed(2)}</div></div>
-                <div class="kpi-card"><div class="kpi-label">Pagado</div><div class="kpi-value">$${pagadoAll.toFixed(2)}</div></div>
-                <div class="kpi-card"><div class="kpi-label">Pendiente</div><div class="kpi-value">$${pendienteAll.toFixed(2)}</div></div>
-            `;
-        }
+        document.getElementById('kpiContainer').innerHTML = `
+            <div class="kpi-card"><div class="kpi-label">Total Gastos</div><div class="kpi-value">$${totalAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Contado</div><div class="kpi-value">$${contadoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Crédito</div><div class="kpi-value">$${creditoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pagado</div><div class="kpi-value">$${pagadoAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pendiente</div><div class="kpi-value">$${pendienteAll.toFixed(2)}</div></div>
+        `;
 
         const weeksMap = new Map();
         expensesData.forEach(item => {
@@ -760,13 +679,10 @@
                 container.appendChild(div);
             }
         }
-        const infoDiv = document.getElementById('activeWeekInfo');
-        if (infoDiv) {
-            infoDiv.innerHTML = currentWeekFilter ? `<i class="fas fa-filter"></i> Filtro activo: <strong>${currentWeekFilter}</strong>` : `<i class="fas fa-chart-line"></i> Haz clic en cualquier semana para filtrar la tabla.`;
-        }
+        document.getElementById('activeWeekInfo').innerHTML = currentWeekFilter ? `<i class="fas fa-filter"></i> Filtro activo: <strong>${currentWeekFilter}</strong>` : `<i class="fas fa-chart-line"></i> Haz clic en cualquier semana para filtrar la tabla.`;
     }
 
-    // CRUD individual
+    // CRUD
     window.editExpense = (idx) => {
         const item = expensesData[idx];
         document.getElementById('editIndex').value = idx;
@@ -845,7 +761,7 @@
         <div class="header"><h2>Reporte de Gastos</h2><div>Período: ${period}</div><div>Fecha: ${exportDate}</div></div>
         <table border="1"><thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th></tr></thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr style="font-weight:bold"><td colspan="4">TOTALES</td><td style="text-align:right">${sumC.toFixed(2)}</td><td style="text-align:right">${sumK.toFixed(2)}</td><td style="text-align:right">${sumT.toFixed(2)}</td><td colspan="2"></td></tr></tfoot>
+        <tfoot><tr style="font-weight:bold"><td colspan="4">TOTALES</td><td style="text-align:right">${sumC.toFixed(2)}</td><td style="text-align:right">${sumK.toFixed(2)}</td><td style="text-align:right">${sumT.toFixed(2)}</td><td colspan="2"></tr></tfoot>
         </table></body></html>`;
         const blob = new Blob([html], { type: "application/vnd.ms-excel" });
         const a = document.createElement('a');
@@ -854,9 +770,123 @@
         a.click();
         URL.revokeObjectURL(a.href);
     }
+
+    // ================= FUNCIÓN DE IMPORTACIÓN (MEJORADA Y ROBUSTA) =================
+    function importExcel(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+            if (!rows.length || rows.length < 2) {
+                alert("El archivo no contiene datos o está vacío.");
+                return;
+            }
+            // Normalizar encabezados (primera fila)
+            const headers = rows[0].map(cell => {
+                if (cell === undefined || cell === null) return "";
+                return String(cell).trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            });
+            console.log("Encabezados detectados:", headers);
+            
+            // Mapear índices con nombres flexibles
+            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
+            const idxProveedor = headers.findIndex(h => h.includes("PROVEEDOR"));
+            const idxFactura = headers.findIndex(h => h.includes("FACTURA"));
+            const idxOC = headers.findIndex(h => h.includes("O.C") || h === "OC");
+            const idxContado = headers.findIndex(h => h.includes("CONTADO"));
+            const idxCredito = headers.findIndex(h => h.includes("CREDITO") || h.includes("CRÉDITO"));
+            const idxDescripcion = headers.findIndex(h => h.includes("DESCRIPCIÓN") || h.includes("DESCRIPCION"));
+            const idxEstado = headers.findIndex(h => h.includes("ESTADO"));
+            
+            if (idxFecha === -1 || idxProveedor === -1) {
+                alert("No se encontraron columnas obligatorias 'FECHA' y 'PROVEEDOR'. Las columnas detectadas son:\n" + headers.join(", "));
+                return;
+            }
+            
+            let added = 0, skipped = 0;
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0) continue;
+                const fechaRaw = row[idxFecha];
+                const proveedorRaw = row[idxProveedor];
+                if (!fechaRaw || !proveedorRaw) {
+                    skipped++;
+                    continue;
+                }
+                let fechaFormateada = "";
+                // Convertir fecha desde número o texto
+                if (typeof fechaRaw === 'number') {
+                    try {
+                        const date = XLSX.SSF.parse_date_code(fechaRaw);
+                        fechaFormateada = `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
+                    } catch(e) {
+                        fechaFormateada = String(fechaRaw);
+                    }
+                } else {
+                    let fechaStr = String(fechaRaw).trim();
+                    // Soporte para DD/MM/AAAA o AAAA-MM-DD
+                    if (fechaStr.includes("/")) {
+                        const parts = fechaStr.split("/");
+                        if (parts.length === 3) {
+                            let d = parts[0], m = parts[1], y = parts[2];
+                            if (y.length === 2) y = "20" + y;
+                            fechaFormateada = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                        } else {
+                            fechaFormateada = fechaStr;
+                        }
+                    } else {
+                        fechaFormateada = fechaStr;
+                    }
+                }
+                const proveedor = proveedorRaw.toString().trim();
+                const factura = (idxFactura !== -1 && row[idxFactura]) ? row[idxFactura].toString().trim() : "";
+                const oc = (idxOC !== -1 && row[idxOC]) ? row[idxOC].toString().trim() : "";
+                let contado = (idxContado !== -1 && row[idxContado] !== undefined && row[idxContado] !== "") ? parseFloat(row[idxContado]) : 0;
+                let credito = (idxCredito !== -1 && row[idxCredito] !== undefined && row[idxCredito] !== "") ? parseFloat(row[idxCredito]) : 0;
+                if (isNaN(contado)) contado = 0;
+                if (isNaN(credito)) credito = 0;
+                const descripcion = (idxDescripcion !== -1 && row[idxDescripcion]) ? row[idxDescripcion].toString().trim() : "";
+                let estadoRaw = (idxEstado !== -1 && row[idxEstado]) ? row[idxEstado].toString().trim().toUpperCase() : "";
+                if (estadoRaw !== "PAGADO" && estadoRaw !== "CANCELADA") estadoRaw = "PENDIENTE";
+                
+                const total = contado + credito;
+                expensesData.push({
+                    fecha: fechaFormateada,
+                    proveedor: proveedor,
+                    factura: factura,
+                    oc: oc,
+                    contado: contado,
+                    credito: credito,
+                    total: total,
+                    descripcion: descripcion,
+                    estado: estadoRaw
+                });
+                added++;
+            }
+            saveToStorage();
+            renderTable();
+            alert(`Importación completada: ${added} registros añadidos, ${skipped} filas omitidas.`);
+        };
+        reader.onerror = () => alert("Error al leer el archivo. Asegúrate de que sea un Excel válido.");
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Eventos para importar
+    document.getElementById('importExcelBtn').addEventListener('click', () => {
+        document.getElementById('excelFileInput').click();
+    });
+    document.getElementById('excelFileInput').addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            importExcel(e.target.files[0]);
+        }
+        e.target.value = '';
+    });
+
     function printReport() { window.print(); }
 
-    // Event listeners
+    // Event listeners del resto
     document.getElementById('btnAgregarGasto').onclick = () => {
         document.getElementById('editIndex').value = '-1';
         document.getElementById('modalTitle').innerText = 'Agregar Gasto';
