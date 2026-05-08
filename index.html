@@ -38,7 +38,7 @@
             flex-wrap: wrap;
             gap: 1.5rem;
         }
-        /* Logo interactivo */
+        /* Logo interactivo (como Santana Mango) */
         .logo-wrapper {
             position: relative;
             display: inline-block;
@@ -542,16 +542,73 @@
     renderLogo();
     // ====================================================
 
-    // ================= DATOS DE GASTOS =================
+    // ================= DATOS DE GASTOS (persistencia) =================
     const STORAGE_KEY = "expensesDataCompleto";
+
+    // Lista completa de gastos (según el Excel original)
     const defaultExpenses = [
-        // (Se incluyen todos los gastos del Excel original; por brevedad pongo unos pocos, pero debes reemplazar por la lista completa)
-        { fecha:"2025-12-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"PRIMER ABONO RENTA", estado:"PAGADO"},
-        { fecha:"2026-01-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"SEGUNDO ABONO RENTA", estado:"PAGADO"},
-        { fecha:"2026-01-26", proveedor:"CFE", factura:"", oc:"", contado:6476, credito:0, total:6476, descripcion:"LUZ", estado:"PAGADO"},
-        { fecha:"2026-01-28", proveedor:"SAMIRAMIS", factura:"14878", oc:"VARIAS", contado:6964.76, credito:0, total:6964.76, descripcion:"PAGADAS OC", estado:"PAGADO"},
-        { fecha:"2026-01-29", proveedor:"SAMIRAMIS", factura:"14979", oc:"1", contado:0, credito:9677.97, total:9677.97, descripcion:"DISCOS", estado:"PENDIENTE"},
-        // ... (aquí deben ir todos los registros. Para ahorrar espacio, no los repito todos, pero el usuario tiene la lista completa)
+        { fecha:"2025-12-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"PRIMER ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"SEGUNDO ABONO A RENTA DE EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-26", proveedor:"CFE COMISION FEDERAL DE ELECTRICIDAD", factura:"", oc:"", contado:6476, credito:0, total:6476, descripcion:"LUZ ELECTRICA DEL EMPAQUE", estado:"PAGADO"},
+        { fecha:"2026-01-28", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14878", oc:"VARIAS", contado:6964.76, credito:0, total:6964.76, descripcion:"PAGADAS OC QUE ERAN DE AGROMANGO", estado:"PAGADO"},
+        { fecha:"2026-01-29", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14979", oc:"1", contado:0, credito:9677.97, total:9677.97, descripcion:"DISCOS,LIJAS,PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-01-29", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14980", oc:"2", contado:0, credito:3645.04, total:3645.04, descripcion:"FLEXOMETRO,BROCAS", estado:"PENDIENTE"},
+        { fecha:"2026-01-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14981", oc:"3", contado:0, credito:1931.01, total:1931.01, descripcion:"SOLDADURA 6011, PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-02-05", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14952", oc:"4", contado:0, credito:3235.87, total:3235.87, descripcion:"PUNTAS,DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-02-06", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14982", oc:"5", contado:0, credito:7539.01, total:7539.01, descripcion:"BROCHAS,THINNER", estado:"PENDIENTE"},
+        { fecha:"2026-02-13", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14951", oc:"7", contado:0, credito:1497.95, total:1497.95, descripcion:"ESTOPA,DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-02-13", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14949", oc:"8", contado:0, credito:591.38, total:591.38, descripcion:"LIMPIADOR GRASA", estado:"PENDIENTE"},
+        { fecha:"2026-02-16", proveedor:"SAMIRAMIS MARES GALINDO", factura:"14950", oc:"9", contado:0, credito:155, total:155, descripcion:"BOLSA PIJA", estado:"PENDIENTE"},
+        { fecha:"2026-02-19", proveedor:"PM PAQUETERIA", factura:"90873", oc:"47", contado:982.46, credito:0, total:982.46, descripcion:"ENVIO MATERIAL", estado:"PAGADO"},
+        { fecha:"2026-02-24", proveedor:"FERNANDO AGUSTIN SORIA", factura:"", oc:"11", contado:0, credito:49776.17, total:49776.17, descripcion:"4 KITS EPOXICA", estado:"PAGADO"},
+        { fecha:"2026-02-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15065", oc:"12", contado:0, credito:27482, total:27482, descripcion:"2 KITS EPOXICA", estado:"PENDIENTE"},
+        { fecha:"2026-02-26", proveedor:"INSUMOS Y RIEGOS DEL SUR", factura:"", oc:"13", contado:5758.08, credito:0, total:5758.08, descripcion:"TUBOS PVC", estado:"PAGADO"},
+        { fecha:"2026-02-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15066", oc:"14", contado:0, credito:1645, total:1645, descripcion:"ESMERIL DEWALT", estado:"PENDIENTE"},
+        { fecha:"2026-02-27", proveedor:"PMM PAQUETEROA", factura:"91683", oc:"48", contado:484.41, credito:0, total:484.41, descripcion:"PAQUETERIA", estado:"PAGADO"},
+        { fecha:"2026-03-03", proveedor:"PMM PAQUETERIA", factura:"92381", oc:"51", contado:245.84, credito:0, total:245.84, descripcion:"ENVIO", estado:"PAGADO"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15070", oc:"15", contado:0, credito:840, total:840, descripcion:"PINTURA EPOXICA", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"17", contado:0, credito:1201.04, total:1201.04, descripcion:"REMACHES", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15072", oc:"16", contado:0, credito:447, total:447, descripcion:"SILICON", estado:"PENDIENTE"},
+        { fecha:"2026-03-03", proveedor:"CESAR EDUARDO ARRAYALES", factura:"CB0EA2", oc:"", contado:6090, credito:0, total:6090, descripcion:"RECTIFICADO FLECHA", estado:"PAGADO"},
+        { fecha:"2026-03-04", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15068", oc:"18", contado:0, credito:149.99, total:149.99, descripcion:"DISCOS CORTE", estado:"PENDIENTE"},
+        { fecha:"2026-03-05", proveedor:"CESAR EDUARDO ARRAYALES", factura:"CB0EA2", oc:"19", contado:3056.6, credito:0, total:3056.6, descripcion:"CARTUCHOS GRASA", estado:"PAGADO"},
+        { fecha:"2026-03-06", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15067", oc:"20", contado:0, credito:736, total:736, descripcion:"PEGAMENTOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-06", proveedor:"CESAR EDUARDO ARRAYALES", factura:"B0B3C36", oc:"3,6,22", contado:0, credito:32700.4, total:32700.4, descripcion:"MATERIAL MANTENIMIENTO", estado:"PAGADO"},
+        { fecha:"2026-03-09", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15069", oc:"23", contado:0, credito:745.01, total:745.01, descripcion:"CARDA", estado:"PENDIENTE"},
+        { fecha:"2026-03-10", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15074", oc:"24", contado:0, credito:4625.96, total:4625.96, descripcion:"COMBO ESMERIL", estado:"PENDIENTE"},
+        { fecha:"2026-03-11", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15073", oc:"25", contado:0, credito:650, total:650, descripcion:"TORNILLOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-17", proveedor:"JUMAPAE", factura:"", oc:"", contado:36792, credito:0, total:36792, descripcion:"AGUA Y DRENAJE", estado:"PENDIENTE"},
+        { fecha:"2026-03-17", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15200", oc:"26", contado:0, credito:5559.94, total:5559.94, descripcion:"CINTA MASKIN", estado:"PENDIENTE"},
+        { fecha:"2026-03-18", proveedor:"NOVATEC PAGANI", factura:"", oc:"30", contado:325728, credito:325728, total:651456, descripcion:"CAJAS PLASTICO", estado:"PENDIENTE"},
+        { fecha:"2026-03-19", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15189", oc:"27", contado:0, credito:390.86, total:390.86, descripcion:"DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-20", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15190", oc:"28", contado:0, credito:1214.01, total:1214.01, descripcion:"CARDA", estado:"PENDIENTE"},
+        { fecha:"2026-03-20", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15198", oc:"29", contado:0, credito:380, total:380, descripcion:"CUTER", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15201", oc:"32", contado:0, credito:777, total:777, descripcion:"MACHUELOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15188", oc:"33", contado:0, credito:934, total:934, descripcion:"MULTIMETRO", estado:"PENDIENTE"},
+        { fecha:"2026-03-25", proveedor:"ELVA ROSA BARRON", factura:"318", oc:"34", contado:568.4, credito:0, total:568.4, descripcion:"SELLO", estado:"PAGADO"},
+        { fecha:"2026-03-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"36", contado:0, credito:941, total:941, descripcion:"CARDAS", estado:"PENDIENTE"},
+        { fecha:"2026-03-27", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15197", oc:"35", contado:0, credito:1645, total:1645, descripcion:"ESMERIL", estado:"PENDIENTE"},
+        { fecha:"2026-03-28", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"37", contado:0, credito:1524, total:1524, descripcion:"DISCOS", estado:"PENDIENTE"},
+        { fecha:"2026-03-28", proveedor:"PROVEEDORA DEL SOLDADOR", factura:"LCO33082", oc:"38", contado:5652.68, credito:0, total:5652.68, descripcion:"MAQUINA INVERSORA", estado:"PAGADO"},
+        { fecha:"2026-03-30", proveedor:"LABORATORIO LAQUIM", factura:"2954", oc:"39", contado:12488.62, credito:0, total:12488.62, descripcion:"ANALISIS MICROBIOLOGICOS", estado:"PAGADO"},
+        { fecha:"2026-03-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15192", oc:"40", contado:0, credito:4535.99, total:4535.99, descripcion:"CUBETA PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-03-31", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15193", oc:"41", contado:0, credito:546.03, total:546.03, descripcion:"GUANTES", estado:"PENDIENTE"},
+        { fecha:"2026-03-31", proveedor:"HUGO ALEJANDRO DURAN", factura:"31473-A", oc:"42", contado:18208, credito:0, total:18208, descripcion:"SOLERA", estado:"PAGADO"},
+        { fecha:"2026-04-01", proveedor:"CESAR EDUARDO ARRAYALES", factura:"", oc:"43", contado:0, credito:15270.37, total:15270.37, descripcion:"DULONA", estado:"PENDIENTE"},
+        { fecha:"2026-04-01", proveedor:"SAMIRAMIS MARES GALINDO", factura:"", oc:"44", contado:0, credito:2601, total:2601, descripcion:"RESISTOL", estado:"PENDIENTE"},
+        { fecha:"2026-04-07", proveedor:"HUGO ALEJANDRO DURAN", factura:"31569-A", oc:"46", contado:2390, credito:0, total:2390, descripcion:"SOLDADURA", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"LABORATORIO LAQUIM", factura:"3006", oc:"49", contado:11572.22, credito:0, total:11572.22, descripcion:"LIQUIDACION ANALISIS", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"KIWA", factura:"", oc:"50", contado:30200.6, credito:0, total:30200.6, descripcion:"ANTICIPO CERTIFICADO", estado:"PAGADO"},
+        { fecha:"2026-04-07", proveedor:"CFE", factura:"", oc:"", contado:2596, credito:0, total:2596, descripcion:"LUZ ELECTRICA", estado:"PAGADO"},
+        { fecha:"2026-04-08", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15194", oc:"56", contado:0, credito:4323, total:4323, descripcion:"ROTOMARTILLO", estado:"PENDIENTE"},
+        { fecha:"2026-04-08", proveedor:"SAMIRAMIS MARES GALINDO", factura:"15196", oc:"58", contado:0, credito:5756, total:5756, descripcion:"PINTURA", estado:"PENDIENTE"},
+        { fecha:"2026-04-09", proveedor:"HUGO ALEJANDRO DURAN", factura:"31584A", oc:"59", contado:2502, credito:0, total:2502, descripcion:"SOLERAS", estado:"PAGADO"},
+        { fecha:"2026-04-13", proveedor:"JAVIER ERNESTO PADILLA", factura:"14030", oc:"20", contado:1435.22, credito:0, total:1435.22, descripcion:"BANDA", estado:"PAGADO"},
+        { fecha:"2026-04-13", proveedor:"HUGO ALEJANDRO DURAN", factura:"31607", oc:"61", contado:2637, credito:0, total:2637, descripcion:"SOLDADURA", estado:"PAGADO"},
+        { fecha:"2026-04-14", proveedor:"DERECHOS", factura:"", oc:"", contado:3510, credito:0, total:3510, descripcion:"DERECHOS HIDROTERMICO", estado:"PAGADO"},
+        { fecha:"2026-04-15", proveedor:"ALFAMAQ", factura:"", oc:"65", contado:12241.88, credito:18362.84, total:30604.72, descripcion:"IMPRESORAS (EUROS)", estado:"PENDIENTE"},
+        { fecha:"2026-04-18", proveedor:"EMEX", factura:"", oc:"", contado:30000, credito:0, total:30000, descripcion:"FONDO TERCERIA", estado:"PENDIENTE"},
+        { fecha:"2026-04-19", proveedor:"USDA", factura:"", oc:"", contado:8464.67, credito:0, total:8464.67, descripcion:"FONDO USDA", estado:"PENDIENTE"}
     ];
 
     let expensesData = [];
@@ -615,6 +672,9 @@
     function renderTable() {
         const filtered = getFilteredData();
         const tbody = document.getElementById('tableBody');
+        const footContado = document.getElementById('footContado');
+        const footCredito = document.getElementById('footCredito');
+        const footTotal = document.getElementById('footTotal');
         if (!tbody) return;
         tbody.innerHTML = '';
         let sumC = 0, sumK = 0, sumT = 0;
@@ -638,9 +698,6 @@
             sumK += item.credito;
             sumT += item.total;
         });
-        const footContado = document.getElementById('footContado');
-        const footCredito = document.getElementById('footCredito');
-        const footTotal = document.getElementById('footTotal');
         if (footContado) footContado.innerHTML = sumC.toFixed(2);
         if (footCredito) footCredito.innerHTML = sumK.toFixed(2);
         if (footTotal) footTotal.innerHTML = sumT.toFixed(2);
