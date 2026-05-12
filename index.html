@@ -92,32 +92,7 @@
         <div class="kpi-grid" id="kpiContainer"></div>
     </div>
 
-    <div class="filters-bar">
-        <div class="filter-group"><label><i class="fas fa-search"></i> Buscar</label><input type="text" id="searchInput" placeholder="Proveedor / concepto"></div>
-        <div class="filter-group"><label>Estado</label><select id="statusFilter"><option value="all">Todos</option><option value="PAGADO">Pagado</option><option value="PENDIENTE">Pendiente</option></select></div>
-        <div class="filter-group"><label>Tipo</label><select id="typeFilter"><option value="all">Todos</option><option value="contado">Solo Contado</option><option value="credito">Solo Crédito</option></select></div>
-        <button class="btn-outline" id="resetFilters"><i class="fas fa-undo-alt"></i> Limpiar todo</button>
-        <div class="action-buttons">
-            <button class="btn-outline btn-excel" id="importExcelBtn"><i class="fas fa-file-upload"></i> Importar Excel</button>
-            <button class="btn-outline btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
-            <button class="btn-outline" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
-        </div>
-    </div>
     
-    <div class="delete-all-btn">
-        <button class="btn-outline btn-danger" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> Eliminar TODOS los gastos</button>
-    </div>
-
-    <div class="table-wrapper">
-        <table class="expense-table" id="expensesTable">
-            <thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr</thead>
-            <tbody id="tableBody"></tbody>
-            <tfoot id="tableFoot">
-                <tr><td colspan="4" style="text-align:right"><strong>TOTALES</strong></td><td id="footContado">0.00</td><td id="footCredito">0.00</td><td id="footTotal">0.00</td><td colspan="3"></td>
-            </tfoot>
-        </table>
-    </div>
-
     <div class="weekly-summary">
         <div class="weekly-header">
             <h3><i class="far fa-calendar-alt"></i> Resumen por Semana (clic para filtrar)</h3>
@@ -130,6 +105,34 @@
         <div id="activeWeekInfo" style="margin-top: 0.5rem; font-size: 0.7rem; color: #5b6e8c;"></div>
     </div>
 </div>
+
+
+<div class="filters-bar">
+    <div class="filter-group"><label><i class="fas fa-search"></i> Buscar</label><input type="text" id="searchInput" placeholder="Proveedor / concepto"></div>
+    <div class="filter-group"><label>Estado</label><select id="statusFilter"><option value="all">Todos</option><option value="PAGADO">Pagado</option><option value="PENDIENTE">Pendiente</option></select></div>
+    <div class="filter-group"><label>Tipo</label><select id="typeFilter"><option value="all">Todos</option><option value="contado">Solo Contado</option><option value="credito">Solo Crédito</option></select></div>
+    <button class="btn-outline" id="resetFilters"><i class="fas fa-undo-alt"></i> Limpiar todo</button>
+    <div class="action-buttons">
+        <button class="btn-outline btn-excel" id="importExcelBtn"><i class="fas fa-file-upload"></i> Importar Excel</button>
+        <button class="btn-outline btn-excel" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+        <button class="btn-outline" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
+    </div>
+</div>
+
+<div class="delete-all-btn">
+    <button class="btn-outline btn-danger" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> Eliminar TODOS los gastos</button>
+</div>
+
+<div class="table-wrapper">
+    <table class="expense-table" id="expensesTable">
+        <thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr</thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot">
+            <tr><td colspan="4" style="text-align:right"><strong>TOTALES</strong></td><td id="footContado">0.00</td><td id="footCredito">0.00</td><td id="footTotal">0.00</td><td colspan="3"></td>
+        </tfoot>
+    </table>
+</div>
+
 
 <!-- Modal para agregar/editar gastos -->
 <div id="gastoModal" class="modal">
@@ -150,6 +153,9 @@
     </div>
 </div>
 
+
+
+
 <!-- Modal para agregar semana personalizada -->
 <div id="customWeekModal" class="modal">
     <div class="modal-content">
@@ -162,6 +168,9 @@
         </form>
     </div>
 </div>
+
+
+
 
 <!-- Input oculto para seleccionar archivo Excel -->
 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
@@ -429,6 +438,7 @@
         document.getElementById('modalEstado').value = item.estado;
         document.getElementById('gastoModal').style.display = 'flex';
     };
+    
     window.deleteExpense = (idx) => {
         if (confirm('¿Eliminar este gasto?')) {
             expensesData.splice(idx, 1);
