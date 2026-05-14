@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Gestor de Gastos | Semanas personalizables</title>
+    <title>Gestor de Gastos | Totales por moneda separados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -38,16 +38,15 @@
         .filter-group label { font-size: 0.7rem; font-weight: 600; color: #3f5a7c; }
         .filter-group input, .filter-group select { background: #f9fbfd; border: 1px solid #dce3ec; border-radius: 14px; padding: 0.5rem 0.8rem; font-size: 0.8rem; }
         .action-buttons { display: flex; gap: 0.8rem; margin-left: auto; align-items: center; }
-        .delete-all-btn { margin-bottom: 1rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
         .table-wrapper { background: white; border-radius: 24px; overflow-x: auto; border: 1px solid #eef2f8; }
         .expense-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 1100px; }
-        .expense-table th, .expense-table td { padding: 0.85rem 0.7rem; border-bottom: 1px solid #f0f2f6; text-align: left; }
+        .expense-table th, .expense-table td { padding: 0.85rem 0.5rem; border-bottom: 1px solid #f0f2f6; text-align: left; }
         .expense-table th { background: #f8fafd; font-weight: 600; color: #2c4d6e; }
         .badge-pagado { background: #dff0e4; color: #1f6e43; }
         .badge-pendiente { background: #ffedea; color: #bc4e2c; }
         .badge-cancelada { background: #efefef; color: #6b6b6b; }
         .badge-status { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
-        .action-icons i { font-size: 1rem; margin: 0 5px; cursor: pointer; color: #5b6e8c; }
+        .action-icons i { font-size: 1rem; margin: 0 3px; cursor: pointer; color: #5b6e8c; }
         .action-icons i:hover { color: #1e3c72; }
         .total-row-footer { background: #f7f9fc; font-weight: 700; }
         .weekly-summary { margin-top: 2rem; background: white; border-radius: 24px; padding: 1.2rem; border: 1px solid #eef2f8; }
@@ -57,16 +56,19 @@
         .weekly-item:hover { background: #f5f9ff; transform: translateX(4px); }
         .weekly-item.active-week { background: #e2edfc; font-weight: 600; border-left: 4px solid #1e3c72; padding-left: 0.8rem; }
         .week-info { flex: 1; display: flex; justify-content: space-between; align-items: center; }
-        .week-delete, .week-delete-custom { cursor: pointer; color: #dc2626; margin-left: 1rem; font-size: 0.9rem; opacity: 0.6; }
-        .week-delete:hover, .week-delete-custom:hover { opacity: 1; transform: scale(1.05); }
+        .week-edit, .week-delete-custom { cursor: pointer; margin-left: 0.8rem; font-size: 0.9rem; opacity: 0.6; }
+        .week-edit { color: #f59e0b; }
+        .week-delete-custom { color: #dc2626; }
+        .week-edit:hover, .week-delete-custom:hover { opacity: 1; transform: scale(1.05); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; border-radius: 32px; width: 90%; max-width: 550px; padding: 1.8rem; }
         .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
         .form-group label { font-weight: 600; font-size: 0.75rem; margin-bottom: 0.2rem; }
         .form-group input, .form-group select { padding: 0.6rem; border-radius: 16px; border: 1px solid #ccc; }
         .modal-buttons { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1rem; }
+        .footer-row { background: #f8fafd; font-weight: 600; }
         @media print {
-            .btn-primary, .filters-bar, .kpi-grid, .weekly-summary, .action-buttons, .delete-all-btn, .modal, #clearWeekFilterBtn, .btn-outline, .btn-excel, .btn-danger, .action-icons, .delete-logo-btn, .week-delete, .week-delete-custom { display: none !important; }
+            .btn-primary, .filters-bar, .kpi-grid, .weekly-summary, .action-buttons, .modal, #clearWeekFilterBtn, .btn-outline, .btn-excel, .btn-danger, .action-icons, .delete-logo-btn, .week-edit, .week-delete-custom { display: none !important; }
             body { background: white; padding: 1cm; }
             .dashboard-header { border: none; box-shadow: none; padding: 0; }
             .title-section h1 { font-size: 1.2rem; color: black; background: none; }
@@ -83,22 +85,24 @@
             <div class="logo-area" id="logoArea"></div>
             <div class="title-section">
                 <h1><i class="fas fa-file-invoice-dollar"></i> Gestor de Gastos</h1>
-                <p>Persistencia total | Semanas personalizables (aunque no tengan gastos)</p>
+                <p>Totales separados por moneda (MXN, USD, EUR) · Resumen semanal en MXN</p>
             </div>
             <div>
                 <button class="btn-primary" id="btnAgregarGasto"><i class="fas fa-plus"></i> Nuevo Gasto</button>
+                <button class="btn-outline" id="clearAllBtn" style="margin-left:0.5rem;"><i class="fas fa-trash-alt"></i> Eliminar todo</button>
             </div>
         </div>
         <div class="kpi-grid" id="kpiContainer"></div>
     </div>
 
     
+    <!-- Resumen semanal -->
     <div class="weekly-summary">
         <div class="weekly-header">
-            <h3><i class="far fa-calendar-alt"></i> Resumen por Semana (clic para filtrar)</h3>
+            <h3><i class="far fa-calendar-alt"></i> Resumen por Semana (total en MXN, clic para filtrar)</h3>
             <div>
-                <button class="btn-outline" id="addCustomWeekBtn" style="font-size:0.7rem;"><i class="fas fa-plus"></i> Agregar Semana Personalizada</button>
-                <button class="btn-outline" id="clearWeekFilterBtn" style="font-size:0.7rem;"><i class="fas fa-times-circle"></i> Limpiar filtro semana</button>
+                <button class="btn-outline" id="addCustomWeekBtn"><i class="fas fa-plus"></i> Agregar Semana Personalizada</button>
+                <button class="btn-outline" id="clearWeekFilterBtn"><i class="fas fa-times-circle"></i> Limpiar filtro semana</button>
             </div>
         </div>
         <div id="weeklyList" class="weekly-grid"></div>
@@ -106,7 +110,7 @@
     </div>
 </div>
 
-
+<!-- Filtros -->
 <div class="filters-bar">
     <div class="filter-group"><label><i class="fas fa-search"></i> Buscar</label><input type="text" id="searchInput" placeholder="Proveedor / concepto"></div>
     <div class="filter-group"><label>Estado</label><select id="statusFilter"><option value="all">Todos</option><option value="PAGADO">Pagado</option><option value="PENDIENTE">Pendiente</option></select></div>
@@ -119,22 +123,24 @@
     </div>
 </div>
 
-<div class="delete-all-btn">
-    <button class="btn-outline btn-danger" id="deleteAllBtn"><i class="fas fa-trash-alt"></i> Eliminar TODOS los gastos</button>
-</div>
-
+<!-- Tabla de gastos -->
 <div class="table-wrapper">
     <table class="expense-table" id="expensesTable">
-        <thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr</thead>
+        <thead>
+            <tr>
+                <th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th>
+                <th>CONTADO</th><th>CRÉDITO</th><th>MONEDA</th><th>TOTAL (original)</th>
+                <th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th>
+            </tr>
+        </thead>
         <tbody id="tableBody"></tbody>
         <tfoot id="tableFoot">
-            <tr><td colspan="4" style="text-align:right"><strong>TOTALES</strong></td><td id="footContado">0.00</td><td id="footCredito">0.00</td><td id="footTotal">0.00</td><td colspan="3"></td>
+            <!-- Se llenará dinámicamente con filas de totales por moneda -->
         </tfoot>
     </table>
 </div>
 
-
-<!-- Modal para agregar/editar gastos -->
+<!-- Modales (sin cambios) -->
 <div id="gastoModal" class="modal">
     <div class="modal-content">
         <h2 id="modalTitle">Agregar Gasto</h2>
@@ -146,6 +152,13 @@
             <div class="form-group"><label>O.C</label><input type="text" id="modalOC"></div>
             <div class="form-group"><label>Contado</label><input type="number" step="0.01" id="modalContado" value="0"></div>
             <div class="form-group"><label>Crédito</label><input type="number" step="0.01" id="modalCredito" value="0"></div>
+            <div class="form-group"><label>Moneda</label>
+                <select id="modalCurrency">
+                    <option value="MXN">MXN ($)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                </select>
+            </div>
             <div class="form-group"><label>Descripción</label><input type="text" id="modalDescripcion"></div>
             <div class="form-group"><label>Estado</label><select id="modalEstado"><option value="PAGADO">PAGADO</option><option value="PENDIENTE">PENDIENTE</option><option value="CANCELADA">CANCELADA</option></select></div>
             <div class="modal-buttons"><button type="button" class="btn-outline" id="closeModalBtn">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div>
@@ -153,65 +166,32 @@
     </div>
 </div>
 
+<div id="customWeekModal" class="modal"><div class="modal-content"><h2>Agregar Semana Personalizada</h2><form id="customWeekForm"><div class="form-group"><label>Nombre</label><input type="text" id="weekName" required placeholder="Ej: SEMANA DEL 20 AL 26 DE ABRIL"></div><div class="form-group"><label>Fecha Inicio</label><input type="date" id="weekStart" required></div><div class="form-group"><label>Fecha Fin</label><input type="date" id="weekEnd" required></div><div class="modal-buttons"><button type="button" class="btn-outline" id="closeCustomWeekModal">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
 
+<div id="editAnyWeekModal" class="modal"><div class="modal-content"><h2>Editar Semana</h2><p style="font-size:0.8rem; margin-bottom:1rem; color:#f59e0b;">Al editar una semana predefinida, se creará una copia personalizada.</p><form id="editAnyWeekForm"><input type="hidden" id="editWeekOriginalName"><input type="hidden" id="editWeekIsPredefined" value="false"><div class="form-group"><label>Nombre</label><input type="text" id="editWeekName" required></div><div class="form-group"><label>Fecha Inicio</label><input type="date" id="editWeekStart" required></div><div class="form-group"><label>Fecha Fin</label><input type="date" id="editWeekEnd" required></div><div class="modal-buttons"><button type="button" class="btn-outline" id="closeEditAnyWeekModal">Cancelar</button><button type="submit" class="btn-primary">Guardar</button></div></form></div></div>
 
-
-<!-- Modal para agregar semana personalizada -->
-<div id="customWeekModal" class="modal">
-    <div class="modal-content">
-        <h2>Agregar Semana Personalizada</h2>
-        <form id="customWeekForm">
-            <div class="form-group"><label>Nombre de la Semana</label><input type="text" id="weekName" required placeholder="Ej: SEMANA DEL 20 AL 26 DE ABRIL"></div>
-            <div class="form-group"><label>Fecha Inicio</label><input type="date" id="weekStart" required></div>
-            <div class="form-group"><label>Fecha Fin</label><input type="date" id="weekEnd" required></div>
-            <div class="modal-buttons"><button type="button" class="btn-outline" id="closeCustomWeekModal">Cancelar</button><button type="submit" class="btn-primary">Guardar Semana</button></div>
-        </form>
-    </div>
-</div>
-
-
-
-
-<!-- Input oculto para seleccionar archivo Excel -->
 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
 
 <script>
     // ================= LOGO INTERACTIVO =================
     const logoArea = document.getElementById('logoArea');
     let currentLogoData = localStorage.getItem('santana_logo');
-
     function renderLogo() {
         if (currentLogoData) {
-            logoArea.innerHTML = `
-                <div class="logo-wrapper">
-                    <img src="${currentLogoData}" class="logo-img" alt="Logo">
-                    <button class="delete-logo-btn" id="deleteLogoBtn" title="Eliminar logo">✕</button>
-                </div>
-            `;
-            const deleteBtn = document.getElementById('deleteLogoBtn');
-            if (deleteBtn) deleteBtn.addEventListener('click', (e) => {
+            logoArea.innerHTML = `<div class="logo-wrapper"><img src="${currentLogoData}" class="logo-img" alt="Logo"><button class="delete-logo-btn" id="deleteLogoBtn" title="Eliminar logo">✕</button></div>`;
+            document.getElementById('deleteLogoBtn')?.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (confirm('¿Eliminar el logotipo actual?')) {
-                    localStorage.removeItem('santana_logo');
-                    currentLogoData = null;
-                    renderLogo();
-                }
+                if (confirm('¿Eliminar el logotipo actual?')) { localStorage.removeItem('santana_logo'); currentLogoData = null; renderLogo(); }
             });
         } else {
             logoArea.innerHTML = `<div class="logo-placeholder" id="uploadLogoPlaceholder">📷</div>`;
             document.getElementById('uploadLogoPlaceholder')?.addEventListener('click', () => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
+                const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            currentLogoData = ev.target.result;
-                            localStorage.setItem('santana_logo', currentLogoData);
-                            renderLogo();
-                        };
+                        reader.onload = (ev) => { currentLogoData = ev.target.result; localStorage.setItem('santana_logo', currentLogoData); renderLogo(); };
                         reader.readAsDataURL(file);
                     }
                 };
@@ -221,77 +201,97 @@
     }
     renderLogo();
 
+    // ================= CONVERSIÓN DE MONEDAS (solo para edición) =================
+    const EXCHANGE_RATES = { USD: 20.50, EUR: 22.00 };
+    function convertAmount(amount, fromCurrency, toCurrency) {
+        if (fromCurrency === toCurrency) return amount;
+        let amountMXN;
+        if (fromCurrency === 'MXN') amountMXN = amount;
+        else if (fromCurrency === 'USD') amountMXN = amount * EXCHANGE_RATES.USD;
+        else if (fromCurrency === 'EUR') amountMXN = amount * EXCHANGE_RATES.EUR;
+        else return amount;
+        if (toCurrency === 'MXN') return amountMXN;
+        if (toCurrency === 'USD') return amountMXN / EXCHANGE_RATES.USD;
+        if (toCurrency === 'EUR') return amountMXN / EXCHANGE_RATES.EUR;
+        return amount;
+    }
+
+    function getCurrencySymbol(currency) {
+        if (currency === 'MXN') return '$';
+        if (currency === 'USD') return 'US$';
+        if (currency === 'EUR') return '€';
+        return '';
+    }
+
     // ================= DATOS DE GASTOS =================
     const STORAGE_KEY = "expensesDataCompleto";
     const CUSTOM_WEEKS_KEY = "customWeeks";
 
-    const defaultExpenses = [ /* Todos los gastos del Excel... */ ];
-    // POR RAZONES DE LONGITUD, AQUÍ NO ESCRIBO TODO EL ARRAY PERO SE ENTIENDE QUE ESTÁ COMPLETO.
-    // Incluyo una versión abreviada, pero en tu código real debes mantener los 64 registros.
-    // Para que funcione correctamente, reemplaza esta línea con el array completo que ya tienes.
-
-    // Como no puedo copiar el array completo aquí (supera el límite), te lo resumo con unos pocos registros de ejemplo.
-    // Pero en tu código original sí está completo. Asegúrate de tener la lista completa.
-    const defaultExpensesShort = [
-        { fecha:"2025-12-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"PRIMER ABONO A RENTA", estado:"PAGADO"},
-        { fecha:"2026-01-10", proveedor:"IQ PRODUCE S DE PR DE RL", factura:"", oc:"", contado:500000, credito:0, total:500000, descripcion:"SEGUNDO ABONO", estado:"PAGADO"},
-        { fecha:"2026-01-26", proveedor:"CFE", factura:"", oc:"", contado:6476, credito:0, total:6476, descripcion:"LUZ", estado:"PAGADO"}
+    const predefinedRanges = [
+        { name: "SEMANA DEL 8 AL 14 DE DICIEMBRE 2025", start: "2025-12-08", end: "2025-12-14" },
+        { name: "SEMANA DEL 5 AL 10 DE ENERO 2026", start: "2026-01-05", end: "2026-01-10" },
+        { name: "SEMANA DEL 26 AL 31 DE ENERO 2026", start: "2026-01-26", end: "2026-01-31" },
+        { name: "SEMANA DEL 9 AL 14 DE FEBRERO 2026", start: "2026-02-09", end: "2026-02-14" },
+        { name: "SEMANA DEL 16 AL 21 DE FEBRERO 2026", start: "2026-02-16", end: "2026-02-21" },
+        { name: "SEMANA DEL 23 AL 28 DE FEBRERO 2026", start: "2026-02-23", end: "2026-02-28" },
+        { name: "SEMANA DEL 1 AL 8 DE MARZO 2026", start: "2026-03-01", end: "2026-03-08" },
+        { name: "SEMANA DEL 9 AL 15 DE MARZO 2026", start: "2026-03-09", end: "2026-03-15" },
+        { name: "SEMANA DEL 16 AL 22 DE MARZO 2026", start: "2026-03-16", end: "2026-03-22" },
+        { name: "SEMANA DEL 23 AL 29 DE MARZO 2026", start: "2026-03-23", end: "2026-03-29" },
+        { name: "SEMANA DEL 30 DE MARZO AL 5 DE ABRIL 2026", start: "2026-03-30", end: "2026-04-05" },
+        { name: "SEMANA DEL 6 AL 12 DE ABRIL 2026", start: "2026-04-06", end: "2026-04-12" },
+        { name: "SEMANA DEL 13 AL 19 DE ABRIL 2026", start: "2026-04-13", end: "2026-04-19" },
+        { name: "SEMANA DEL 20 AL 26 DE ABRIL 2026", start: "2026-04-20", end: "2026-04-26" },
+        { name: "SEMANA DEL 27 DE ABRIL AL 3 DE MAYO 2026", start: "2026-04-27", end: "2026-05-03" }
     ];
-    // Para evitar errores, usaremos defaultExpressions correctamente. 
-    // En tu versión final, mantén el array original.
 
     let expensesData = [];
     let customWeeks = [];
 
     function loadCustomWeeks() {
         const stored = localStorage.getItem(CUSTOM_WEEKS_KEY);
-        if (stored) {
-            try { customWeeks = JSON.parse(stored); } catch(e) { customWeeks = []; }
-        } else {
-            customWeeks = [];
-        }
+        customWeeks = stored ? JSON.parse(stored) : [];
     }
     function saveCustomWeeks() { localStorage.setItem(CUSTOM_WEEKS_KEY, JSON.stringify(customWeeks)); }
-
     function loadFromStorage() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            try { const parsed = JSON.parse(stored); if (Array.isArray(parsed) && parsed.length > 0) expensesData = parsed; else expensesData = JSON.parse(JSON.stringify(defaultExpensesShort)); } catch(e) { expensesData = JSON.parse(JSON.stringify(defaultExpensesShort)); }
+            try {
+                const parsed = JSON.parse(stored);
+                expensesData = Array.isArray(parsed) ? parsed : [];
+            } catch(e) { expensesData = []; }
         } else {
-            expensesData = JSON.parse(JSON.stringify(defaultExpensesShort));
+            expensesData = [];
         }
-        expensesData.forEach(item => { item.total = (item.contado || 0) + (item.credito || 0); });
+        expensesData.forEach(item => { if (!item.currency) item.currency = "MXN"; item.total = (item.contado || 0) + (item.credito || 0); });
         saveToStorage();
     }
     function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(expensesData)); }
+    function clearAllData() {
+        if (expensesData.length === 0 && customWeeks.length === 0) return;
+        if (confirm('⚠️ ¿Eliminar TODOS los gastos y semanas personalizadas?')) {
+            expensesData = [];
+            customWeeks = [];
+            saveToStorage();
+            saveCustomWeeks();
+            currentWeekFilter = null;
+            renderTable();
+            alert('Datos eliminados.');
+        }
+    }
     loadFromStorage();
     loadCustomWeeks();
 
-    // Obtener la etiqueta de semana (prioriza personalizadas, luego predefinidas)
     function getWeekTag(dateStr) {
         const date = new Date(dateStr);
         for (let w of customWeeks) {
-            let start = new Date(w.start);
-            let end = new Date(w.end);
+            let start = new Date(w.start), end = new Date(w.end);
             end.setHours(23,59,59,999);
             if (date >= start && date <= end) return w.name;
         }
-        const ranges = [
-            { name: "SEMANA DEL 8 AL 14 DE DICIEMBRE 2025", start: "2025-12-08", end: "2025-12-14" },
-            { name: "SEMANA DEL 5 AL 10 DE ENERO 2026", start: "2026-01-05", end: "2026-01-10" },
-            { name: "SEMANA DEL 26 AL 31 DE ENERO 2026", start: "2026-01-26", end: "2026-01-31" },
-            { name: "SEMANA DEL 9 AL 14 DE FEBRERO 2026", start: "2026-02-09", end: "2026-02-14" },
-            { name: "SEMANA DEL 16 AL 21 DE FEBRERO 2026", start: "2026-02-16", end: "2026-02-21" },
-            { name: "SEMANA DEL 23 AL 28 DE FEBRERO 2026", start: "2026-02-23", end: "2026-02-28" },
-            { name: "SEMANA DEL 1 AL 8 DE MARZO 2026", start: "2026-03-01", end: "2026-03-08" },
-            { name: "SEMANA DEL 9 AL 15 DE MARZO 2026", start: "2026-03-09", end: "2026-03-15" },
-            { name: "SEMANA DEL 16 AL 22 DE MARZO 2026", start: "2026-03-16", end: "2026-03-22" },
-            { name: "SEMANA DEL 23 AL 29 DE MARZO 2026", start: "2026-03-23", end: "2026-03-29" },
-            { name: "SEMANA DEL 30 DE MARZO AL 5 DE ABRIL 2026", start: "2026-03-30", end: "2026-04-05" },
-            { name: "SEMANA DEL 6 AL 12 DE ABRIL 2026", start: "2026-04-06", end: "2026-04-12" },
-            { name: "SEMANA DEL 13 AL 19 DE ABRIL 2026", start: "2026-04-13", end: "2026-04-19" }
-        ];
-        for (let r of ranges) if (date >= new Date(r.start) && date <= new Date(r.end)) return r.name;
+        for (let r of predefinedRanges) {
+            if (date >= new Date(r.start) && date <= new Date(r.end)) return r.name;
+        }
         return `Semana del ${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
     }
 
@@ -313,47 +313,67 @@
         return filtered;
     }
 
+    function formatNumber(amount) { return amount.toFixed(2); }
+
+    // ================= RENDER TABLA CON TOTALES POR MONEDA =================
     function renderTable() {
         const filtered = getFilteredData();
         const tbody = document.getElementById('tableBody');
         if (!tbody) return;
         tbody.innerHTML = '';
-        let sumC = 0, sumK = 0, sumT = 0;
+        let sumMXN = 0, sumUSD = 0, sumEUR = 0;
+        
         filtered.forEach(item => {
             const badgeClass = item.estado === 'PAGADO' ? 'badge-pagado' : (item.estado === 'CANCELADA' ? 'badge-cancelada' : 'badge-pendiente');
+            const totalOriginal = item.total;
+            
+            // Acumular según la moneda
+            if (item.currency === 'MXN') sumMXN += totalOriginal;
+            else if (item.currency === 'USD') sumUSD += totalOriginal;
+            else if (item.currency === 'EUR') sumEUR += totalOriginal;
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${item.fecha}</td>
-                <td>${item.proveedor}</td>
-                <td>${item.factura || '-'}</td>
-                <td>${item.oc || '-'}</td>
-                <td style="text-align:right">${item.contado.toFixed(2)}</td>
-                <td style="text-align:right">${item.credito.toFixed(2)}</td>
-                <td style="text-align:right;font-weight:600">${item.total.toFixed(2)}</td>
-                <td style="max-width:200px">${item.descripcion.substring(0,55)}</td>
-                <td><span class="badge-status ${badgeClass}">${item.estado}</span></td>
-                <td class="action-icons"><i class="fas fa-edit" onclick="editExpense(${expensesData.indexOf(item)})"></i> <i class="fas fa-trash-alt" onclick="deleteExpense(${expensesData.indexOf(item)})"></i></td>
+                <td>${item.fecha}<\/td>
+                <td>${item.proveedor}<\/td>
+                <td>${item.factura || '-'}<\/td>
+                <td>${item.oc || '-'}<\/td>
+                <td style="text-align:right">${getCurrencySymbol(item.currency)} ${formatNumber(item.contado)}<\/td>
+                <td style="text-align:right">${getCurrencySymbol(item.currency)} ${formatNumber(item.credito)}<\/td>
+                <td>${item.currency}<\/td>
+                <td style="text-align:right">${getCurrencySymbol(item.currency)} ${formatNumber(totalOriginal)}<\/td>
+                <td style="max-width:180px">${item.descripcion.substring(0,50)}<\/td>
+                <td><span class="badge-status ${badgeClass}">${item.estado}<\/span><\/td>
+                <td class="action-icons"><i class="fas fa-edit" onclick="editExpense(${expensesData.indexOf(item)})"><\/i> <i class="fas fa-trash-alt" onclick="deleteExpense(${expensesData.indexOf(item)})"><\/i><\/td>
             `;
             tbody.appendChild(tr);
-            sumC += item.contado;
-            sumK += item.credito;
-            sumT += item.total;
         });
-        document.getElementById('footContado').innerHTML = sumC.toFixed(2);
-        document.getElementById('footCredito').innerHTML = sumK.toFixed(2);
-        document.getElementById('footTotal').innerHTML = sumT.toFixed(2);
+        
+        // Construir pie de tabla con totales separados por moneda
+        const foot = document.getElementById('tableFoot');
+        foot.innerHTML = `
+            <tr class="footer-row"><td colspan="4" style="text-align:right"><strong>TOTAL MXN</strong></td><td colspan="2" style="text-align:right"><strong>$${formatNumber(sumMXN)} MXN</strong></td><td colspan="5"></td></tr>
+            <tr class="footer-row"><td colspan="4" style="text-align:right"><strong>TOTAL USD</strong></td><td colspan="2" style="text-align:right"><strong>US$ ${formatNumber(sumUSD)}</strong></td><td colspan="5"></td></tr>
+            <tr class="footer-row"><td colspan="4" style="text-align:right"><strong>TOTAL EUR</strong></td><td colspan="2" style="text-align:right"><strong>€ ${formatNumber(sumEUR)}</strong></td><td colspan="5"></td></tr>
+        `;
+        
         updateWeeklySummary();
     }
 
+    // ================= RESUMEN SEMANAL Y KPI (TOTALES POR MONEDA) =================
     function updateWeeklySummary() {
+        // Resumen semanal solo en MXN (como estaba)
         const weeksTotal = new Map();
         expensesData.forEach(item => {
-            const week = getWeekTag(item.fecha);
-            weeksTotal.set(week, (weeksTotal.get(week) || 0) + item.total);
+            if (item.currency === 'MXN') {
+                const week = getWeekTag(item.fecha);
+                const amount = item.total;
+                weeksTotal.set(week, (weeksTotal.get(week) || 0) + amount);
+            }
         });
         const allWeeksSet = new Set();
         customWeeks.forEach(w => allWeeksSet.add(w.name));
-        for (let [week, total] of weeksTotal.entries()) allWeeksSet.add(week);
+        for (let [week] of weeksTotal.entries()) allWeeksSet.add(week);
         const allWeeks = Array.from(allWeeksSet);
         allWeeks.sort((a,b) => {
             const aIsCustom = customWeeks.some(w => w.name === a);
@@ -368,62 +388,131 @@
             return a.localeCompare(b);
         });
         const container = document.getElementById('weeklyList');
-        if (!container) return;
         container.innerHTML = '';
         if (allWeeks.length === 0) {
-            container.innerHTML = '<div style="padding:1rem; text-align:center; color:#6c757d;">No hay semanas definidas</div>';
+            container.innerHTML = '<div style="padding:1rem; text-align:center;">No hay gastos en MXN. Importa un Excel o agrega gastos manualmente en MXN.</div>';
         } else {
             for (let week of allWeeks) {
                 const total = weeksTotal.get(week) || 0;
                 const isCustom = customWeeks.some(w => w.name === week);
+                const isPredefined = predefinedRanges.some(r => r.name === week);
+                let startDate = "", endDate = "";
+                if (isCustom) { const w = customWeeks.find(w => w.name === week); startDate = w.start; endDate = w.end; }
+                else if (isPredefined) { const r = predefinedRanges.find(r => r.name === week); startDate = r.start; endDate = r.end; }
                 const div = document.createElement('div');
                 div.className = `weekly-item ${currentWeekFilter === week ? 'active-week' : ''}`;
                 div.innerHTML = `
                     <div class="week-info">
                         <span><i class="far fa-calendar-check"></i> ${week}</span>
-                        <span><strong>$${total.toFixed(2)}</strong></span>
+                        <span><strong>$${total.toFixed(2)} MXN</strong></span>
                     </div>
-                    <i class="fas fa-trash-alt ${isCustom ? 'week-delete-custom' : 'week-delete'}" data-week="${week}" title="Eliminar semana personalizada"></i>
+                    <div class="week-actions">
+                        <i class="fas fa-edit week-edit" data-name="${week}" data-predefined="${isPredefined}" data-start="${startDate}" data-end="${endDate}" title="Editar semana"></i>
+                        ${isCustom ? `<i class="fas fa-trash-alt week-delete-custom" data-name="${week}" title="Eliminar semana"></i>` : ''}
+                    </div>
                 `;
-                const deleteIcon = div.querySelector('.week-delete, .week-delete-custom');
-                deleteIcon.addEventListener('click', (e) => {
+                const editIcon = div.querySelector('.week-edit');
+                editIcon.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (deleteIcon.classList.contains('week-delete-custom')) {
-                        if (confirm(`¿Eliminar la semana personalizada "${week}"? Los gastos se reagruparán automáticamente.`)) {
+                    openEditWeekModal(week, isPredefined, startDate, endDate);
+                });
+                if (isCustom) {
+                    const deleteIcon = div.querySelector('.week-delete-custom');
+                    deleteIcon.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm(`¿Eliminar la semana personalizada "${week}"?`)) {
                             customWeeks = customWeeks.filter(w => w.name !== week);
                             saveCustomWeeks();
                             if (currentWeekFilter === week) currentWeekFilter = null;
                             renderTable();
                         }
-                    } else {
-                        alert("No se pueden eliminar las semanas predefinidas. Puede agregar semanas personalizadas.");
-                    }
-                });
+                    });
+                }
                 div.addEventListener('click', (e) => {
-                    if (e.target === deleteIcon || deleteIcon.contains(e.target)) return;
+                    if (e.target.classList?.contains('week-edit') || e.target.classList?.contains('week-delete-custom')) return;
                     currentWeekFilter = (currentWeekFilter === week) ? null : week;
                     renderTable();
                 });
                 container.appendChild(div);
             }
         }
-        document.getElementById('activeWeekInfo').innerHTML = currentWeekFilter ? `<i class="fas fa-filter"></i> Filtro activo: <strong>${currentWeekFilter}</strong>` : `<i class="fas fa-chart-line"></i> Haz clic en cualquier semana para filtrar la tabla.`;
-        // Actualizar KPIs
-        const totalAll = expensesData.reduce((a,b)=>a+b.total,0);
-        const contadoAll = expensesData.reduce((a,b)=>a+b.contado,0);
-        const creditoAll = expensesData.reduce((a,b)=>a+b.credito,0);
-        const pagadoAll = expensesData.filter(e=>e.estado==='PAGADO').reduce((a,b)=>a+b.total,0);
-        const pendienteAll = expensesData.filter(e=>e.estado==='PENDIENTE').reduce((a,b)=>a+b.total,0);
+        document.getElementById('activeWeekInfo').innerHTML = currentWeekFilter ? `🔍 Filtro activo: ${currentWeekFilter}` : `📅 Haz clic en cualquier semana para filtrar la tabla.`;
+
+        // Calcular totales por moneda para los KPI
+        const totalMXN = expensesData.filter(i => i.currency === 'MXN').reduce((s, i) => s + i.total, 0);
+        const totalUSD = expensesData.filter(i => i.currency === 'USD').reduce((s, i) => s + i.total, 0);
+        const totalEUR = expensesData.filter(i => i.currency === 'EUR').reduce((s, i) => s + i.total, 0);
+        const pagadoMXN = expensesData.filter(i => i.currency === 'MXN' && i.estado === 'PAGADO').reduce((s, i) => s + i.total, 0);
+        const pendienteMXN = expensesData.filter(i => i.currency === 'MXN' && i.estado === 'PENDIENTE').reduce((s, i) => s + i.total, 0);
+        
         document.getElementById('kpiContainer').innerHTML = `
-            <div class="kpi-card"><div class="kpi-label">Total Gastos</div><div class="kpi-value">$${totalAll.toFixed(2)}</div></div>
-            <div class="kpi-card"><div class="kpi-label">Contado</div><div class="kpi-value">$${contadoAll.toFixed(2)}</div></div>
-            <div class="kpi-card"><div class="kpi-label">Crédito</div><div class="kpi-value">$${creditoAll.toFixed(2)}</div></div>
-            <div class="kpi-card"><div class="kpi-label">Pagado</div><div class="kpi-value">$${pagadoAll.toFixed(2)}</div></div>
-            <div class="kpi-card"><div class="kpi-label">Pendiente</div><div class="kpi-value">$${pendienteAll.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">💰 Total MXN</div><div class="kpi-value">$${totalMXN.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">💵 Total USD</div><div class="kpi-value">US$ ${totalUSD.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">💶 Total EUR</div><div class="kpi-value">€ ${totalEUR.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">✅ Pagado (MXN)</div><div class="kpi-value">$${pagadoMXN.toFixed(2)}</div></div>
+            <div class="kpi-card"><div class="kpi-label">⏳ Pendiente (MXN)</div><div class="kpi-value">$${pendienteMXN.toFixed(2)}</div></div>
         `;
     }
 
-    // CRUD
+    function openEditWeekModal(weekName, isPredefined, startDate, endDate) {
+        document.getElementById('editWeekOriginalName').value = weekName;
+        document.getElementById('editWeekIsPredefined').value = isPredefined ? 'true' : 'false';
+        document.getElementById('editWeekName').value = weekName;
+        document.getElementById('editWeekStart').value = startDate;
+        document.getElementById('editWeekEnd').value = endDate;
+        document.getElementById('editAnyWeekModal').style.display = 'flex';
+    }
+
+    function saveEditedWeek(originalName, isPredefined, newName, newStart, newEnd) {
+        if (!newName || !newStart || !newEnd) return false;
+        if (new Date(newStart) > new Date(newEnd)) { alert("La fecha inicio debe ser anterior a la fecha fin."); return false; }
+        if (!isPredefined) {
+            const index = customWeeks.findIndex(w => w.name === originalName);
+            if (index !== -1) {
+                if (customWeeks.some((w,i) => i!==index && w.name === newName)) { alert("Ya existe otra semana personalizada con ese nombre."); return false; }
+                customWeeks[index] = { name: newName, start: newStart, end: newEnd };
+                saveCustomWeeks();
+                renderTable();
+                return true;
+            }
+            return false;
+        } else {
+            if (customWeeks.some(w => w.name === newName)) { alert("Ya existe una semana personalizada con ese nombre."); return false; }
+            customWeeks.push({ name: newName, start: newStart, end: newEnd });
+            saveCustomWeeks();
+            renderTable();
+            alert(`Se ha creado la semana personalizada "${newName}". La original "${originalName}" sigue disponible.`);
+            return true;
+        }
+    }
+
+    // ================= CRUD CON CONVERSIÓN DINÁMICA =================
+    let previousCurrency = 'MXN';
+    function convertModalAmounts(fromCurrency, toCurrency) {
+        const contadoInput = document.getElementById('modalContado');
+        const creditoInput = document.getElementById('modalCredito');
+        if (!contadoInput || !creditoInput) return;
+        let contado = parseFloat(contadoInput.value) || 0;
+        let credito = parseFloat(creditoInput.value) || 0;
+        if (fromCurrency === toCurrency) return;
+        const newContado = convertAmount(contado, fromCurrency, toCurrency);
+        const newCredito = convertAmount(credito, fromCurrency, toCurrency);
+        contadoInput.value = newContado.toFixed(2);
+        creditoInput.value = newCredito.toFixed(2);
+    }
+    function setupCurrencyConversion() {
+        const currencySelect = document.getElementById('modalCurrency');
+        if (!currencySelect) return;
+        currencySelect.addEventListener('focus', () => { previousCurrency = currencySelect.value; });
+        currencySelect.addEventListener('change', () => {
+            const newCurrency = currencySelect.value;
+            if (previousCurrency !== newCurrency) {
+                convertModalAmounts(previousCurrency, newCurrency);
+                previousCurrency = newCurrency;
+            }
+        });
+    }
+
     window.editExpense = (idx) => {
         const item = expensesData[idx];
         document.getElementById('editIndex').value = idx;
@@ -434,17 +523,14 @@
         document.getElementById('modalOC').value = item.oc;
         document.getElementById('modalContado').value = item.contado;
         document.getElementById('modalCredito').value = item.credito;
+        document.getElementById('modalCurrency').value = item.currency || 'MXN';
         document.getElementById('modalDescripcion').value = item.descripcion;
         document.getElementById('modalEstado').value = item.estado;
+        previousCurrency = item.currency || 'MXN';
         document.getElementById('gastoModal').style.display = 'flex';
     };
-    
     window.deleteExpense = (idx) => {
-        if (confirm('¿Eliminar este gasto?')) {
-            expensesData.splice(idx, 1);
-            saveToStorage();
-            renderTable();
-        }
+        if (confirm('¿Eliminar este gasto?')) { expensesData.splice(idx,1); saveToStorage(); renderTable(); }
     };
     function addOrUpdateExpense(e) {
         e.preventDefault();
@@ -454,11 +540,12 @@
         const oc = document.getElementById('modalOC').value;
         let contado = parseFloat(document.getElementById('modalContado').value) || 0;
         let credito = parseFloat(document.getElementById('modalCredito').value) || 0;
+        const currency = document.getElementById('modalCurrency').value;
         const descripcion = document.getElementById('modalDescripcion').value;
         const estado = document.getElementById('modalEstado').value;
         const total = contado + credito;
         const editIdx = parseInt(document.getElementById('editIndex').value);
-        const newExpense = { fecha, proveedor, factura, oc, contado, credito, total, descripcion, estado };
+        const newExpense = { fecha, proveedor, factura, oc, contado, credito, total, descripcion, estado, currency };
         if (editIdx === -1) expensesData.push(newExpense);
         else expensesData[editIdx] = newExpense;
         saveToStorage();
@@ -467,54 +554,29 @@
         document.getElementById('editIndex').value = '-1';
         renderTable();
     }
-    function deleteAll() {
-        if (expensesData.length === 0) return alert('No hay gastos para eliminar');
-        if (confirm(`⚠️ Se eliminarán TODOS los ${expensesData.length} gastos. ¿Confirmas?`)) {
-            expensesData = [];
-            saveToStorage();
-            renderTable();
-            alert('Todos los gastos han sido eliminados.');
-        }
-    }
+
     function exportToExcel() {
         const filtered = getFilteredData();
-        if (filtered.length === 0) return alert('Sin datos para exportar');
-        let period = currentWeekFilter || (filtered.length ? `Reporte del ${filtered[0].fecha} al ${filtered[filtered.length-1].fecha}` : 'Reporte');
-        const exportDate = new Date().toLocaleDateString('es-MX');
-        const rows = filtered.map(i => `
-            <tr>
-                <td>${i.fecha}</td>
-                <td>${i.proveedor}</td>
-                <td>${i.factura || ''}</td>
-                <td>${i.oc || ''}</td>
-                <td style="text-align:right">${i.contado.toFixed(2)}</td>
-                <td style="text-align:right">${i.credito.toFixed(2)}</td>
-                <td style="text-align:right">${i.total.toFixed(2)}</td>
-                <td>${i.descripcion}</td>
-                <td>${i.estado}</td>
-            </tr>
-        `).join('');
-        let sumC = 0, sumK = 0, sumT = 0;
-        filtered.forEach(i => { sumC += i.contado; sumK += i.credito; sumT += i.total; });
-        const html = `<!DOCTYPE html>
-        <html><head><meta charset="UTF-8"><title>Reporte de Gastos</title>
-        <style>body{font-family:Arial;margin:2cm;}.header{text-align:center;margin-bottom:20px;}h2{color:#1e3c72;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #aaa;padding:8px;text-align:left;}th{background:#f2f2f2;}</style>
-        </head><body>
-        <div class="header"><h2>Reporte de Gastos</h2><div>Período: ${period}</div><div>Fecha: ${exportDate}</div></div>
-        <table border="1"><thead><tr><th>FECHA</th><th>PROVEEDOR</th><th>FACTURA</th><th>O.C</th><th>CONTADO</th><th>CRÉDITO</th><th>TOTAL</th><th>DESCRIPCIÓN</th><th>ESTADO</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr style="font-weight:bold"><td colspan="4">TOTALES</td><td style="text-align:right">${sumC.toFixed(2)}</td><td style="text-align:right">${sumK.toFixed(2)}</td><td style="text-align:right">${sumT.toFixed(2)}</td><td colspan="2"></tr></tfoot>
-        </table>
-        </body></html>`;
-        const blob = new Blob([html], { type: "application/vnd.ms-excel" });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `Reporte_Gastos_${new Date().toISOString().slice(0,19)}.xls`;
-        a.click();
-        URL.revokeObjectURL(a.href);
+        if (!filtered.length) return alert('Sin datos para exportar');
+        const exportData = filtered.map(item => ({
+            "FECHA": item.fecha,
+            "PROVEEDOR": item.proveedor,
+            "FACTURA": item.factura || "",
+            "O.C": item.oc || "",
+            "CONTADO": item.contado,
+            "CRÉDITO": item.credito,
+            "MONEDA": item.currency,
+            "TOTAL": item.total,
+            "DESCRIPCIÓN": item.descripcion,
+            "ESTADO": item.estado
+        }));
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Gastos");
+        XLSX.writeFile(wb, `reporte_gastos_${new Date().toISOString().slice(0,19)}.xlsx`);
     }
 
-    // Importar Excel (con conversión de fechas)
+    // ================= IMPORTACIÓN EXCEL =================
     function convertExcelDateToYMD(dateValue) {
         if (!dateValue) return null;
         if (typeof dateValue === 'number') {
@@ -523,18 +585,19 @@
                 return `${date.y}-${String(date.m).padStart(2,'0')}-${String(date.d).padStart(2,'0')}`;
             } catch(e) { return null; }
         }
-        const str = String(dateValue).trim();
-        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-        if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
-            let parts = str.split('/');
+        let s = String(dateValue).trim();
+        if (s.includes(' ')) s = s.split(' ')[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+            let parts = s.split('/');
             return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
-        if (/^\d{2}\/\d{2}\/\d{2}$/.test(str)) {
-            let parts = str.split('/');
+        if (/^\d{2}\/\d{2}\/\d{2}$/.test(s)) {
+            let parts = s.split('/');
             let year = parseInt(parts[2]) + 2000;
             return `${year}-${parts[1]}-${parts[0]}`;
         }
-        let d = new Date(str);
+        let d = new Date(s);
         if (!isNaN(d.getTime())) {
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
@@ -544,109 +607,193 @@
     function importExcel(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
-            if (!rows.length || rows.length < 2) {
-                alert("El archivo no contiene datos o está vacío.");
-                return;
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                if (!rows.length) { alert("El archivo está vacío."); return; }
+
+                let headerRowIndex = -1;
+                let headers = [];
+                for (let i = 0; i < Math.min(30, rows.length); i++) {
+                    const row = rows[i];
+                    if (!row || row.length < 3) continue;
+                    const rowStr = row.join(" ").toUpperCase();
+                    if (rowStr.includes("FECHA") && rowStr.includes("PROVEEDOR") && rowStr.includes("CONTADO")) {
+                        headerRowIndex = i;
+                        headers = row.map(cell => {
+                            if (cell === undefined || cell === null) return "";
+                            return String(cell).trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        });
+                        break;
+                    }
+                }
+                if (headerRowIndex === -1) {
+                    alert("No se encontró la fila de encabezados (FECHA, PROVEEDOR, CONTADO...).");
+                    return;
+                }
+
+                const idxFecha = headers.findIndex(h => h.includes("FECHA"));
+                const idxProveedor = headers.findIndex(h => h.includes("PROVEEDOR"));
+                const idxFactura = headers.findIndex(h => h.includes("FACTURA"));
+                const idxOC = headers.findIndex(h => h.includes("O.C") || h === "OC");
+                const idxContado = headers.findIndex(h => h.includes("CONTADO"));
+                const idxCredito = headers.findIndex(h => h.includes("CREDITO") || h.includes("CRÉDITO"));
+                const idxDescripcion = headers.findIndex(h => h.includes("DESCRIPCIÓN") || h.includes("DESCRIPCION"));
+                const idxMoneda = headers.findIndex(h => h.includes("MONEDA"));
+
+                let idxEstado = -1;
+                for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 20, rows.length); i++) {
+                    const row = rows[i];
+                    if (!row) continue;
+                    for (let col = 0; col < row.length; col++) {
+                        const cellValue = row[col];
+                        if (typeof cellValue === 'string') {
+                            const upperVal = cellValue.trim().toUpperCase();
+                            if (upperVal === "PAGADO" || upperVal === "PENDIENTE" || upperVal === "CANCELADA") {
+                                idxEstado = col;
+                                break;
+                            }
+                        }
+                    }
+                    if (idxEstado !== -1) break;
+                }
+
+                if (idxFecha === -1 || idxProveedor === -1) {
+                    alert("No se encontraron las columnas obligatorias 'FECHA' y 'PROVEEDOR'.");
+                    return;
+                }
+
+                let added = 0;
+                for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (!row || row.length === 0) continue;
+
+                    const fechaRaw = row[idxFecha];
+                    if (!fechaRaw) continue;
+                    const fechaFormateada = convertExcelDateToYMD(fechaRaw);
+                    if (!fechaFormateada) continue;
+
+                    const proveedorRaw = row[idxProveedor];
+                    if (!proveedorRaw || proveedorRaw.toString().trim() === "") continue;
+                    const proveedor = proveedorRaw.toString().trim();
+
+                    const rowText = row.join(" ").toUpperCase();
+                    if (rowText.includes("TOTAL") || rowText.includes("SUM(") || rowText.includes("SEMANA DEL")) continue;
+
+                    const factura = (idxFactura !== -1 && row[idxFactura]) ? row[idxFactura].toString().trim() : "";
+                    const oc = (idxOC !== -1 && row[idxOC]) ? row[idxOC].toString().trim() : "";
+                    let contado = 0, credito = 0;
+                    if (idxContado !== -1 && row[idxContado] !== undefined && row[idxContado] !== "") contado = parseFloat(row[idxContado]);
+                    if (idxCredito !== -1 && row[idxCredito] !== undefined && row[idxCredito] !== "") credito = parseFloat(row[idxCredito]);
+                    if (isNaN(contado)) contado = 0;
+                    if (isNaN(credito)) credito = 0;
+                    if (contado === 0 && credito === 0) continue;
+
+                    const descripcion = (idxDescripcion !== -1 && row[idxDescripcion]) ? row[idxDescripcion].toString().trim() : "";
+                    
+                    let estado = "PENDIENTE";
+                    if (idxEstado !== -1 && row[idxEstado] !== undefined && row[idxEstado] !== "") {
+                        const estadoRaw = row[idxEstado].toString().trim().toUpperCase();
+                        if (estadoRaw === "PAGADO") estado = "PAGADO";
+                        else if (estadoRaw === "CANCELADA") estado = "CANCELADA";
+                        else if (estadoRaw === "PENDIENTE") estado = "PENDIENTE";
+                    }
+                    
+                    let currency = "MXN";
+                    if (idxMoneda !== -1 && row[idxMoneda]) {
+                        const mon = row[idxMoneda].toString().trim().toUpperCase();
+                        if (mon === "USD") currency = "USD";
+                        else if (mon === "EUR") currency = "EUR";
+                    }
+                    const total = contado + credito;
+                    expensesData.push({
+                        fecha: fechaFormateada,
+                        proveedor: proveedor,
+                        factura: factura,
+                        oc: oc,
+                        contado: contado,
+                        credito: credito,
+                        total: total,
+                        descripcion: descripcion,
+                        estado: estado,
+                        currency: currency
+                    });
+                    added++;
+                }
+
+                if (added === 0) {
+                    alert("No se encontraron registros válidos.");
+                    return;
+                }
+                saveToStorage();
+                renderTable();
+                alert(`Importación completada: ${added} registros añadidos.`);
+            } catch (error) {
+                console.error(error);
+                alert("Error al procesar el archivo.");
             }
-            const headers = rows[0].map(cell => String(cell || "").trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
-            const idxProveedor = headers.findIndex(h => h.includes("PROVEEDOR"));
-            const idxFactura = headers.findIndex(h => h.includes("FACTURA"));
-            const idxOC = headers.findIndex(h => h.includes("O.C") || h === "OC");
-            const idxContado = headers.findIndex(h => h.includes("CONTADO"));
-            const idxCredito = headers.findIndex(h => h.includes("CREDITO") || h.includes("CRÉDITO"));
-            const idxDescripcion = headers.findIndex(h => h.includes("DESCRIPCIÓN") || h.includes("DESCRIPCION"));
-            const idxEstado = headers.findIndex(h => h.includes("ESTADO"));
-            if (idxFecha === -1 || idxProveedor === -1) {
-                alert("No se encontraron columnas obligatorias 'FECHA' y 'PROVEEDOR'.");
-                return;
-            }
-            let added = 0, skipped = 0;
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length === 0) continue;
-                const fechaFormateada = convertExcelDateToYMD(row[idxFecha]);
-                if (!fechaFormateada) { skipped++; continue; }
-                const proveedorRaw = row[idxProveedor];
-                if (!proveedorRaw || proveedorRaw.toString().trim() === "") { skipped++; continue; }
-                const proveedor = proveedorRaw.toString().trim();
-                const factura = (idxFactura !== -1 && row[idxFactura]) ? row[idxFactura].toString().trim() : "";
-                const oc = (idxOC !== -1 && row[idxOC]) ? row[idxOC].toString().trim() : "";
-                let contado = (idxContado !== -1 && row[idxContado] !== undefined && row[idxContado] !== "") ? parseFloat(row[idxContado]) : 0;
-                let credito = (idxCredito !== -1 && row[idxCredito] !== undefined && row[idxCredito] !== "") ? parseFloat(row[idxCredito]) : 0;
-                if (isNaN(contado)) contado = 0;
-                if (isNaN(credito)) credito = 0;
-                const descripcion = (idxDescripcion !== -1 && row[idxDescripcion]) ? row[idxDescripcion].toString().trim() : "";
-                let estadoRaw = (idxEstado !== -1 && row[idxEstado]) ? row[idxEstado].toString().trim().toUpperCase() : "";
-                if (!["PAGADO","CANCELADA"].includes(estadoRaw)) estadoRaw = "PENDIENTE";
-                expensesData.push({
-                    fecha: fechaFormateada, proveedor, factura, oc, contado, credito,
-                    total: contado + credito, descripcion, estado: estadoRaw
-                });
-                added++;
-            }
-            saveToStorage();
-            renderTable();
-            alert(`Importación completada: ${added} registros añadidos, ${skipped} omitidos.`);
         };
         reader.onerror = () => alert("Error al leer el archivo.");
         reader.readAsArrayBuffer(file);
     }
 
-    // Agregar semana personalizada (solo verifica duplicados en customWeeks, no en predefinidas)
-    function addCustomWeek(name, startDate, endDate) {
-        if (!name || !startDate || !endDate) return false;
-        if (customWeeks.some(w => w.name === name)) {
-            alert("Ya existe una semana personalizada con ese nombre. Por favor, elige otro nombre.");
-            return false;
-        }
-        customWeeks.push({ name: name, start: startDate, end: endDate });
+    function addCustomWeek(name, start, end) {
+        if (!name || !start || !end) return false;
+        if (customWeeks.some(w => w.name === name)) { alert("Ya existe una semana con ese nombre."); return false; }
+        customWeeks.push({ name, start, end });
         saveCustomWeeks();
         renderTable();
         return true;
     }
 
-    // Eventos para semanas personalizadas
-    document.getElementById('addCustomWeekBtn').addEventListener('click', () => {
-        document.getElementById('customWeekModal').style.display = 'flex';
+    // ================= EVENTOS =================
+    document.getElementById('editAnyWeekForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const originalName = document.getElementById('editWeekOriginalName').value;
+        const isPredefined = document.getElementById('editWeekIsPredefined').value === 'true';
+        const newName = document.getElementById('editWeekName').value.trim();
+        const newStart = document.getElementById('editWeekStart').value;
+        const newEnd = document.getElementById('editWeekEnd').value;
+        if (!newName || !newStart || !newEnd) return alert("Complete todos los campos.");
+        if (new Date(newStart) > new Date(newEnd)) return alert("La fecha inicio debe ser anterior a la fecha fin.");
+        saveEditedWeek(originalName, isPredefined, newName, newStart, newEnd);
+        document.getElementById('editAnyWeekModal').style.display = 'none';
+        document.getElementById('editAnyWeekForm').reset();
     });
-    document.getElementById('closeCustomWeekModal').addEventListener('click', () => {
-        document.getElementById('customWeekModal').style.display = 'none';
-        document.getElementById('customWeekForm').reset();
+    document.getElementById('closeEditAnyWeekModal').addEventListener('click', () => {
+        document.getElementById('editAnyWeekModal').style.display = 'none';
     });
+
+    document.getElementById('addCustomWeekBtn').addEventListener('click', () => document.getElementById('customWeekModal').style.display='flex');
+    document.getElementById('closeCustomWeekModal').addEventListener('click', () => document.getElementById('customWeekModal').style.display='none');
     document.getElementById('customWeekForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('weekName').value.trim();
         const start = document.getElementById('weekStart').value;
         const end = document.getElementById('weekEnd').value;
-        if (!name || !start || !end) {
-            alert("Complete todos los campos.");
-            return;
-        }
-        if (new Date(start) > new Date(end)) {
-            alert("La fecha de inicio debe ser anterior o igual a la fecha fin.");
-            return;
-        }
+        if (!name || !start || !end) return alert("Complete todos los campos.");
+        if (new Date(start) > new Date(end)) return alert("La fecha inicio debe ser anterior a la fecha fin.");
         addCustomWeek(name, start, end);
         document.getElementById('customWeekModal').style.display = 'none';
         document.getElementById('customWeekForm').reset();
     });
 
-    // Eventos generales
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllData);
+
     document.getElementById('btnAgregarGasto').onclick = () => {
         document.getElementById('editIndex').value = '-1';
         document.getElementById('modalTitle').innerText = 'Agregar Gasto';
         document.getElementById('gastoForm').reset();
         document.getElementById('modalContado').value = '0';
         document.getElementById('modalCredito').value = '0';
+        document.getElementById('modalCurrency').value = 'MXN';
+        previousCurrency = 'MXN';
         document.getElementById('gastoModal').style.display = 'flex';
     };
     document.getElementById('closeModalBtn').onclick = () => document.getElementById('gastoModal').style.display = 'none';
-    window.onclick = (e) => { if (e.target === document.getElementById('gastoModal')) document.getElementById('gastoModal').style.display = 'none'; };
+    window.onclick = (e) => { if (e.target.classList?.contains('modal')) e.target.style.display = 'none'; };
     document.getElementById('gastoForm').addEventListener('submit', addOrUpdateExpense);
     document.getElementById('searchInput').addEventListener('input', renderTable);
     document.getElementById('statusFilter').addEventListener('change', renderTable);
@@ -661,13 +808,12 @@
     document.getElementById('clearWeekFilterBtn').onclick = () => { currentWeekFilter = null; renderTable(); };
     document.getElementById('exportExcelBtn').onclick = exportToExcel;
     document.getElementById('printBtn').onclick = () => window.print();
-    document.getElementById('deleteAllBtn').onclick = deleteAll;
     document.getElementById('importExcelBtn').addEventListener('click', () => document.getElementById('excelFileInput').click());
     document.getElementById('excelFileInput').addEventListener('change', (e) => {
         if (e.target.files.length) importExcel(e.target.files[0]);
         e.target.value = '';
     });
-
+    setupCurrencyConversion();
     renderTable();
 </script>
 </body>
